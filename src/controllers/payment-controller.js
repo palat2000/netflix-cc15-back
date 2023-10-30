@@ -35,7 +35,16 @@ exports.subscription = async (req, res, next) => {
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
-    res.json({ session, subscription });
+    await prisma.user.update({
+      data: {
+        customerID: subscription.customer,
+        subscriptionId: subscription.id,
+      },
+      where: {
+        id: req.user.id,
+      },
+    });
+    res.status(200).json({ message: "OK" });
   } catch (err) {
     next(err);
   }
