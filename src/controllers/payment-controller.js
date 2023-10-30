@@ -2,6 +2,7 @@ const stripe = require("stripe")(
   "sk_test_51Nyq28HpiJPtdULKcJeivFBWE4nNyhMdu4NCpcDc8kEu6DUwOdwjuSmTyRON56jQl4BJdun5kXkYAtko0OF7NRuq00UDbTlf80"
 );
 const { URL } = require("../config/constant");
+const prisma = require("../model/prisma");
 
 exports.payment = async (req, res, next) => {
   try {
@@ -29,6 +30,12 @@ exports.payment = async (req, res, next) => {
 
 exports.subscription = async (req, res, next) => {
   try {
+    const { sessionId } = req.params;
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription
+    );
+    res.json({ session, subscription });
   } catch (err) {
     next(err);
   }
