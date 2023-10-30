@@ -22,6 +22,8 @@ model User {
   mobile         String?          @unique
   activeAt       DateTime?
   expiredDate    DateTime?
+  customerID     String?
+  subscriptionId String?
   paymentHistory PaymentHistory[]
   userAccount    UserAccount[]
 }
