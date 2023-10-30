@@ -9,3 +9,101 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id             Int              @id @default(autoincrement())
+  firstName      String?
+  lastName       String?
+  email          String           @unique
+  password       String
+  birthMonth     Int?
+  birthDate      Int?
+  isActive       Boolean          @default(false)
+  mobile         String?          @unique
+  activeAt       DateTime?
+  expiredDate    DateTime?
+  paymentHistory PaymentHistory[]
+  userAccount    UserAccount[]
+}
+
+model PaymentHistory {
+  id          Int       @id @default(autoincrement())
+  paymentDate DateTime?
+  transaction String?
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model UserAccount {
+  id              Int      @id @default(autoincrement())
+  profileImageUrl String?
+  userProfileName String
+  isKid           Boolean  @default(false)
+  favoriteGenres  String?
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+  myList          MyList[]
+}
+
+model History {
+  id         Int          @id @default(autoincrement())
+  historyId  Int
+  Movie      Movie?       @relation(fields: [movieId], references: [id])
+  movieId    Int?
+  enumGenres GenresSelect
+}
+
+model MyList {
+  id            Int          @id @default(autoincrement())
+  UserAccount   UserAccount? @relation(fields: [userAccountId], references: [id])
+  userAccountId Int?
+  movieId       Int
+  Movie         Movie        @relation(fields: [movieId], references: [id])
+}
+
+model Movie {
+  id             Int          @id @default(autoincrement())
+  title          String
+  release_year   DateTime?
+  count_watching Int?
+  count_liked    Int?
+  detail         String?
+  isTVShow       Boolean      @default(false)
+  image          String?
+  enumGenres     GenresSelect @default(ACTION)
+  myList         MyList[]
+  history        History[]
+  actor          Actors[]
+  video          Video[]
+}
+
+model Actors {
+  id      Int    @id @default(autoincrement())
+  name    String
+  Movie   Movie? @relation(fields: [movieId], references: [id])
+  movieId Int?
+}
+
+model Video {
+  id               Int    @id @default(autoincrement())
+  videoEpisodeName Int    @default(1)
+  videoUrl         String
+  Movie            Movie? @relation(fields: [movieId], references: [id])
+  movieId          Int?
+}
+
+model Admin {
+  id       Int      @id @default(autoincrement())
+  username String
+  password String
+  createAt DateTime
+}
+
+enum GenresSelect {
+  COMEDIES
+  ACTION
+  HORROR
+  SPORTS
+  KID
+  ROMANCE
+}
