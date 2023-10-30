@@ -1,13 +1,11 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { registerSchema, loginSchema } = require("../validators/user&register");
 
 exports.test = (req, res, next) => {
   res.json({ message: "OK" });
 };
 
-exports.user = (req, res, next) => {
-
-}
 
 exports.register = async (req, res, next) => {
   try {
