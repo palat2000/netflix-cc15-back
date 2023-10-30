@@ -3,10 +3,6 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../model/prisma");
 const { registerSchema, loginSchema } = require("../validators/user&register");
 
-exports.test = (req, res, next) => {
-  res.json({ message: "OK" });
-};
-
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = registerSchema.validate(req.body);
