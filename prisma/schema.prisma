@@ -35,12 +35,12 @@ model PaymentHistory {
 }
 
 model UserProfile {
-  id              Int       @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   profileImageUrl String?
   userProfileName String
-  isKid           Boolean   @default(false)
-  favoriteGenres  String?
-  user            User      @relation(fields: [userId], references: [id])
+  isKid           Boolean       @default(false)
+  favoriteGenres  GenresSelect?
+  user            User          @relation(fields: [userId], references: [id])
   userId          Int
   myList          MyList[]
   history         History[]
@@ -64,15 +64,16 @@ model MyList {
 }
 
 model Movie {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   title          String
   release_year   DateTime?
   count_watching Int?
   count_liked    Int?
   detail         String?
-  isTVShow       Boolean      @default(false)
+  isTVShow       Boolean       @default(false)
   image          String?
-  enumGenres     GenresSelect @default(ACTION)
+  trailer        String?
+  enumGenres     GenresSelect? @default(ACTION)
   myList         MyList[]
   history        History[]
   actor          Actors[]

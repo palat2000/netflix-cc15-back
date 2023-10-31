@@ -35,7 +35,17 @@ exports.register = async (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE,
       }
     );
-    res.status(201).json({ accessToken, user });
+
+    const kidProfile = await prisma.userProfile.create({
+      data: {
+        userProfileName: "Kids",
+        favoriteGenres: "KID",
+        profileImageUrl: null,
+        userId: +user.id,
+      },
+    });
+
+    res.status(201).json({ accessToken, user, kidProfile });
   } catch (error) {
     next(error);
   }
@@ -59,7 +69,7 @@ exports.login = async (req, res, next) => {
 
     const isMatch = await bcrypt.compare(value.password, user.password);
     if (!isMatch) {
-      return next(createError("invalid credential", 400));
+      return next(createError("Incorrect password. Please try again. ", 400));
     }
 
     const payload = { userId: user.id };

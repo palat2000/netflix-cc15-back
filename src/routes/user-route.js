@@ -5,8 +5,8 @@ const authenticateMiddleware = require("../middlewares/authenticate");
 
 router.get("/allprofile", authenticateMiddleware, userController.getAllProfile);
 router.get("/profile", authenticateMiddleware, userController.getProfile);
-router.get(
-  "/createProfile",
+router.post(
+  "/profile",
   authenticateMiddleware,
   userController.createUserProfile
 );
