@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 const prisma = require("../model/prisma");
 const { registerSchema, loginSchema } = require("../validators/user&register");
 
@@ -33,7 +34,7 @@ exports.login = async (req, res, next) => {
     if (error) {
       return next(error);
     }
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         OR: [{ email: value.emailOrMobile }, { mobile: value.emailOrMobile }],
       },
@@ -46,7 +47,20 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return next(createError("invalid credential", 400));
     }
-
+    const subscription = await stripe.subscriptions.retrieve(
+      user.subscriptionId
+    );
+    if (subscription.status !== "active") {
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          isActive: false,
+        },
+      });
+      user.isActive = false;
+    }
     const payload = { userId: user.id };
     const accessToken = jwt.sign(
       payload,
