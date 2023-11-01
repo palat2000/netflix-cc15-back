@@ -39,6 +39,7 @@ exports.subscription = async (req, res, next) => {
       data: {
         customerID: subscription.customer,
         subscriptionId: subscription.id,
+        isActive: true,
       },
       where: {
         id: req.user.id,
