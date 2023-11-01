@@ -60,12 +60,12 @@ exports.createUserProfile = async (req, res, next) => {
         userId: +userId,
       },
     });
-    const profileImageUrl = await prisma.userProfile.create({
-      data: {
-        productId: product.id,
-        imageUrl: imageUrl,
-      },
-    });
+    // const profileImageUrl = await prisma.userProfile.create({
+    //   data: {
+    //     productId: product.id,
+    //     imageUrl: imageUrl,
+    //   },
+    // });
     res.status(201).json({ message: "userProfile created", userProfile });
   } catch (error) {
     next(error);
