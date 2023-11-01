@@ -6,6 +6,7 @@ const rateLimitMiddleware = require("./middlewares/rate-limit");
 const errorMiddleware = require("./middlewares/error");
 const notFoundMiddleware = require("./middlewares/not-found");
 const authRoute = require("./routes/auth-route");
+const userBrowseRoute = require("./routes/user-browse-route");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRoute);
+app.use("/user-browse", userBrowseRoute);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
