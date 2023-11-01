@@ -95,26 +95,60 @@ exports.getAllProfile = async (req, res, next) => {
 
 exports.editUserProfile = async (req, res, next) => {
   try {
-    const { userProfileName, userProfileId } = req.body;
+    console.log(req.body, "req.body");
+    const { userProfileName, userProfileId, userId } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
     }
 
-    const imageUrl = await upload(req.file.path);
-    console.log(imageUrl);
+    const body = {
+      userProfileName: userProfileName,
+      profileImageUrl: null,
+    };
 
-    const editUserProfile = await prisma.userProfile.update({
+    const dupUserProfileNameWithUserProfileId =
+      await prisma.userProfile.findFirst({
+        where: {
+          AND: [{ id: +userProfileId }, { userProfileName: userProfileName }],
+        },
+      });
+
+    if (dupUserProfileNameWithUserProfileId) {
+      delete body.userProfileName;
+    }
+    const dupUserProfileNameWithUserId = await prisma.userProfile.findMany({
+      where: {
+        AND: [{ userId: +userId }, { userProfileName: userProfileName }],
+        NOT: dupUserProfileNameWithUserProfileId
+          ? [
+              {
+                id: +dupUserProfileNameWithUserProfileId.id,
+              },
+            ]
+          : [],
+      },
+    });
+    if (dupUserProfileNameWithUserId.length > 0) {
+      return next(createError("This userProfileName is already use", 400));
+    }
+    if (req?.file?.path) {
+      const imageUrl = await upload(req.file.path);
+      body.profileImageUrl = imageUrl;
+    }
+
+    const newUserProfileName = await prisma.userProfile.update({
       where: {
         id: +userProfileId,
       },
-      data: {
-        profileImageUrl: req.body.quantity,
-        userProfileName: userProfileName,
-      },
+      data: body,
     });
 
-    res.status(200).json({ message: "userProfile deleted" });
+    res.status(200).json({ message: "userProfile edited", newUserProfileName });
   } catch (error) {
     next(error);
+  } finally {
+    if (req?.file?.path) {
+      fs.unlink(req?.file?.path);
+    }
   }
 };

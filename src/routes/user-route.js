@@ -24,6 +24,7 @@ router.delete(
 
 router.patch(
   "/profile",
+  upload.single("profileImageUrl"),
   authenticateMiddleware,
   userController.editUserProfile
 );
