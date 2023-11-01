@@ -23,7 +23,7 @@ model User {
   activeAt       DateTime?
   expiredDate    DateTime?
   paymentHistory PaymentHistory[]
-  userAccount    UserAccount[]
+  userAccount    UserProfile[]
 }
 
 model PaymentHistory {
@@ -34,43 +34,46 @@ model PaymentHistory {
   user        User      @relation(fields: [userId], references: [id])
 }
 
-model UserAccount {
-  id              Int      @id @default(autoincrement())
+model UserProfile {
+  id              Int           @id @default(autoincrement())
   profileImageUrl String?
   userProfileName String
-  isKid           Boolean  @default(false)
-  favoriteGenres  String?
-  user            User     @relation(fields: [userId], references: [id])
+  isKid           Boolean       @default(false)
+  favoriteGenres  GenresSelect?
+  user            User          @relation(fields: [userId], references: [id])
   userId          Int
   myList          MyList[]
+  history         History[]
 }
 
 model History {
-  id         Int          @id @default(autoincrement())
-  historyId  Int
-  Movie      Movie?       @relation(fields: [movieId], references: [id])
-  movieId    Int?
-  enumGenres GenresSelect
+  id            Int          @id @default(autoincrement())
+  Movie         Movie?       @relation(fields: [movieId], references: [id])
+  movieId       Int?
+  enumGenres    GenresSelect
+  userProfileId Int
+  UserProfile   UserProfile  @relation(fields: [userProfileId], references: [id])
 }
 
 model MyList {
   id            Int          @id @default(autoincrement())
-  UserAccount   UserAccount? @relation(fields: [userAccountId], references: [id])
+  UserProfile   UserProfile? @relation(fields: [userAccountId], references: [id])
   userAccountId Int?
   movieId       Int
   Movie         Movie        @relation(fields: [movieId], references: [id])
 }
 
 model Movie {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   title          String
   release_year   DateTime?
   count_watching Int?
   count_liked    Int?
   detail         String?
-  isTVShow       Boolean      @default(false)
+  isTVShow       Boolean       @default(false)
   image          String?
-  enumGenres     GenresSelect @default(ACTION)
+  trailer        String?
+  enumGenres     GenresSelect? @default(ACTION)
   myList         MyList[]
   history        History[]
   actor          Actors[]
