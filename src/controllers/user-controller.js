@@ -4,7 +4,6 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 
 exports.createUserProfile = async (req, res, next) => {
-  console.log("req.file", req.file);
   console.log("req.body", req.body);
   try {
     const { userProfileName, isKid, userId } = req.body;
@@ -20,22 +19,32 @@ exports.createUserProfile = async (req, res, next) => {
     }
     console.log(userProfileNameDup);
     if (isKid) favoriteGenres = "KID";
-    const imageUrl = await upload(req.file.path);
-    console.log(imageUrl);
+
+    const body = {
+      userProfileName: userProfileName,
+      favoriteGenres: favoriteGenres,
+      profileImageUrl: null,
+      userId: +userId,
+    };
+
+    if (req?.file?.path) {
+      const imageUrl = await upload(req.file.path);
+      console.log(imageUrl);
+      body.profileImageUrl = imageUrl;
+    }
+
     const userProfile = await prisma.userProfile.create({
-      data: {
-        userProfileName: userProfileName,
-        favoriteGenres: favoriteGenres,
-        profileImageUrl: imageUrl,
-        userId: +userId,
-      },
+      data: body,
     });
 
     res.status(201).json({ message: "userProfile created", userProfile });
   } catch (error) {
     next(error);
   } finally {
-    fs.unlink(req.file.path);
+    console.log("req", req);
+    if (req?.file?.path) {
+      fs.unlink(req?.file?.path);
+    }
   }
 };
 
@@ -63,22 +72,48 @@ exports.getAllProfile = async (req, res, next) => {
     });
     console.log(allUserProfile);
 
-    delete user.password;
-    res.status(200).json({ user: req.user, allUserProfile });
+    res.status(200).json({ allUserProfile });
   } catch (error) {
     next(error);
   }
 };
 
-exports.getProfile = async (req, res, next) => {
+// exports.getProfile = async (req, res, next) => {
+//   console.log(req.body, "body");
+//   try {
+//     const { userProfileId } = req.body;
+//     const userProfile = await prisma.userProfile.findFirst({
+//       where: {
+//         id: userProfileId,
+//       },
+//     });
+//     res.status(200).json({ userProfile });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+exports.editUserProfile = async (req, res, next) => {
   try {
-    const userProfile = await prisma.userProfile.findUnique({
+    const { userProfileName, userProfileId } = req.body;
+    if (!userProfileName) {
+      return next(createError("userProfileName is required", 400));
+    }
+
+    const imageUrl = await upload(req.file.path);
+    console.log(imageUrl);
+
+    const editUserProfile = await prisma.userProfile.update({
       where: {
-        usr,
+        id: +userProfileId,
+      },
+      data: {
+        profileImageUrl: req.body.quantity,
+        userProfileName: userProfileName,
       },
     });
-    delete user.password;
-    res.status(200).json({ user: req.user });
+
+    res.status(200).json({ message: "userProfile deleted" });
   } catch (error) {
     next(error);
   }

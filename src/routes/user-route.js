@@ -4,8 +4,12 @@ const router = express.Router();
 const authenticateMiddleware = require("../middlewares/authenticate");
 const upload = require("../middlewares/upload");
 
-router.get("/allprofile", authenticateMiddleware, userController.getAllProfile);
-router.get("/profile", authenticateMiddleware, userController.getProfile);
+router.post(
+  "/allprofile",
+  authenticateMiddleware,
+  userController.getAllProfile
+);
+// router.get("/profile", authentiscateMiddleware, userController.getProfile);
 router.post(
   "/profile",
   upload.single("profileImageUrl"),
@@ -16,6 +20,12 @@ router.delete(
   "/profile",
   authenticateMiddleware,
   userController.deleteUserProfile
+);
+
+router.patch(
+  "/profile",
+  authenticateMiddleware,
+  userController.editUserProfile
 );
 
 module.exports = router;
