@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
+// app.use("/admin", adminRoute);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
