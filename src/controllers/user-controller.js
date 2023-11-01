@@ -2,36 +2,6 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
-exports.getAllProfile = async (req, res, next) => {
-  console.log(req.user.id, "userId");
-  try {
-    const allUserProfile = await prisma.userProfile.findMany({
-      where: {
-        userId: req.user.id,
-      },
-    });
-    console.log(allUserProfile);
-
-    delete user.password;
-    res.status(200).json({ user: req.user, allUserProfile });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getProfile = async (req, res, next) => {
-  try {
-    const userProfile = await prisma.userProfile.findUnique({
-      where: {
-        usr,
-      },
-    });
-    delete user.password;
-    res.status(200).json({ user: req.user });
-  } catch (error) {
-    next(error);
-  }
-};
 
 exports.createUserProfile = async (req, res, next) => {
   console.log("req.file", req.file);
@@ -60,16 +30,56 @@ exports.createUserProfile = async (req, res, next) => {
         userId: +userId,
       },
     });
-    // const profileImageUrl = await prisma.userProfile.create({
-    //   data: {
-    //     productId: product.id,
-    //     imageUrl: imageUrl,
-    //   },
-    // });
+
     res.status(201).json({ message: "userProfile created", userProfile });
   } catch (error) {
     next(error);
   } finally {
     fs.unlink(req.file.path);
+  }
+};
+
+exports.deleteUserProfile = async (req, res, next) => {
+  try {
+    const { userProfileId } = req.body;
+    const deleteUserProfile = await prisma.userProfile.delete({
+      where: {
+        id: +userProfileId,
+      },
+    });
+    res.status(200).json({ message: "userProfile deleted", deleteUserProfile });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAllProfile = async (req, res, next) => {
+  console.log(req.user.id, "userId");
+  try {
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    console.log(allUserProfile);
+
+    delete user.password;
+    res.status(200).json({ user: req.user, allUserProfile });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getProfile = async (req, res, next) => {
+  try {
+    const userProfile = await prisma.userProfile.findUnique({
+      where: {
+        usr,
+      },
+    });
+    delete user.password;
+    res.status(200).json({ user: req.user });
+  } catch (error) {
+    next(error);
   }
 };

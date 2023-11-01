@@ -12,5 +12,10 @@ router.post(
   authenticateMiddleware,
   userController.createUserProfile
 );
+router.delete(
+  "/profile",
+  authenticateMiddleware,
+  userController.deleteUserProfile
+);
 
 module.exports = router;
