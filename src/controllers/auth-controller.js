@@ -4,10 +4,6 @@ const createError = require("../utils/create-error");
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
 
-exports.test = (req, res, next) => {
-  res.json({ message: "OK" });
-};
-
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = registerSchema.validate(req.body);
