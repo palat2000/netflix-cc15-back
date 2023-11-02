@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
-const prisma = require("../model/prisma");
-const { registerSchema, loginSchema } = require("../validators/user&register");
+const createError = require("../utils/create-error");
+const { registerSchema, loginSchema } = require("../validators/auth-validator");
+const prisma = require("../models/prisma");
 
 exports.register = async (req, res, next) => {
   try {
@@ -10,7 +11,16 @@ exports.register = async (req, res, next) => {
     if (error) {
       return next(error);
     }
+    const emailDup = await prisma.user.findUnique({
+      where: {
+        email: value.email,
+      },
+    });
+    if (emailDup) {
+      return next(createError("email is already used", 400));
+    }
     value.password = await bcrypt.hash(value.password, 12);
+
     const user = await prisma.user.create({
       data: value,
     });
@@ -19,10 +29,20 @@ exports.register = async (req, res, next) => {
       payload,
       process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
       {
-        expiresIn: process.env.JWT_SECRET_KEY,
+        expiresIn: process.env.JWT_EXPIRE,
       }
     );
-    res.status(201).json({ accessToken, user });
+
+    const kidProfile = await prisma.userProfile.create({
+      data: {
+        userProfileName: "Kids",
+        favoriteGenres: "KID",
+        profileImageUrl: null,
+        userId: +user.id,
+      },
+    });
+
+    res.status(201).json({ accessToken, user, kidProfile });
   } catch (error) {
     next(error);
   }
@@ -31,6 +51,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { value, error } = loginSchema.validate(req.body);
+    console.log("dsdsd");
     if (error) {
       return next(error);
     }
@@ -45,7 +66,7 @@ exports.login = async (req, res, next) => {
 
     const isMatch = await bcrypt.compare(value.password, user.password);
     if (!isMatch) {
-      return next(createError("invalid credential", 400));
+      return next(createError("Incorrect password. Please try again. ", 400));
     }
     const subscription = await stripe.subscriptions.retrieve(
       user.subscriptionId
@@ -69,9 +90,20 @@ exports.login = async (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE,
       }
     );
+
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
     delete user.password;
-    res.status(200).json({ accessToken, user });
+    res.status(200).json({ accessToken, user, allUserProfile });
   } catch (error) {
     next(error);
   }
+};
+
+exports.getMe = (req, res) => {
+  res.status(200).json({ user: req.user });
 };
