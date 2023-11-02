@@ -1,7 +1,6 @@
 const createError = require("../utils/create-error");
 const jwt = require("jsonwebtoken");
 const prisma = require("../models/prisma");
-const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 
 module.exports = async (req, res, next) => {
   try {
@@ -20,20 +19,6 @@ module.exports = async (req, res, next) => {
     });
     if (!user) {
       return next(createError("unauthenticated", 401));
-    }
-    const subscription = await stripe.subscriptions.retrieve(
-      user.subscriptionId
-    );
-    if (subscription.status !== "active") {
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          isActive: false,
-        },
-      });
-      user.isActive = false;
     }
     delete user.password;
     req.user = user;
