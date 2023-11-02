@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.5.2",
+    "@prisma/client": "5.5.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
     "cors": "^2.8.5",
@@ -24,14 +24,7 @@
   },
   "devDependencies": {
     "morgan": "^1.10.0",
-    "prisma": "^5.5.2"
+    "prisma": "5.5.2"
   }
-  ,"build": {
-    "extraResources": [
-      {
-        "from": "node_modules/.prisma/client/",
-        "to": "app/node_modules/.prisma/client/"
-      }
-    ]
-  }
+  
 }
