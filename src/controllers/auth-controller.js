@@ -112,3 +112,18 @@ exports.login = async (req, res, next) => {
 exports.getMe = (req, res) => {
   res.status(200).json({ user: req.user });
 };
+
+exports.chooseProfile = async (req, res, next) => {
+  try {
+    const payload = { userProfileId: userProfile.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+  } catch (error) {
+    next(error);
+  }
+};
