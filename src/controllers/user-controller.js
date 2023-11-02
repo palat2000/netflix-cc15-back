@@ -62,22 +62,6 @@ exports.deleteUserProfile = async (req, res, next) => {
   }
 };
 
-exports.getAllProfile = async (req, res, next) => {
-  console.log(req.user.id, "userId");
-  try {
-    const allUserProfile = await prisma.userProfile.findMany({
-      where: {
-        userId: req.user.id,
-      },
-    });
-    console.log(allUserProfile);
-
-    res.status(200).json({ allUserProfile });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // exports.getProfile = async (req, res, next) => {
 //   console.log(req.body, "body");
 //   try {

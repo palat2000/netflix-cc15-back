@@ -6,6 +6,8 @@ const rateLimitMiddleware = require("./middlewares/rate-limit");
 const errorMiddleware = require("./middlewares/error");
 const notFoundMiddleware = require("./middlewares/not-found");
 const authRoute = require("./routes/auth-route");
+const paymentRoute = require("./routes/payment-route");
+const userBrowseRoute = require("./routes/user-browse-route");
 const userRoute = require("./routes/user-route");
 
 const app = express();
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRoute);
+app.use("/payment", paymentRoute);
+app.use("/user-browse", userBrowseRoute);
 app.use("/user", userRoute);
 // app.use("/admin", adminRoute);
 
