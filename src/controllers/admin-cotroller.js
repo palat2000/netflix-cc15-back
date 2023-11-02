@@ -6,16 +6,7 @@ const fs = require("fs/promises");
 exports.createMovie = async (req, res, next) => {
   console.log("req.body", req.body);
   try {
-    const {
-      title,
-      release_year,
-      count_watching,
-      count_liked,
-      detail,
-      isTVShow,
-      enumGenres,
-      trailer,
-    } = req.body;
+    const { title, release_year, detail, isTVShow, enumGenres } = req.body;
 
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
@@ -43,6 +34,12 @@ exports.createMovie = async (req, res, next) => {
       enumGenres: enumGenres,
       trailer: trailer,
     };
+
+    const movie = await prisma.movie.create({
+      data: body,
+    });
+
+    res.status(201).json({ message: "movie created", movie });
   } catch (error) {
     next(error);
   } finally {

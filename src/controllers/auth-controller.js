@@ -66,6 +66,7 @@ exports.register = async (req, res, next) => {
         userProfileName: "Kids",
         favoriteGenres: "KID",
         profileImageUrl: null,
+        isKid: true,
         userId: +user.id,
       },
     });
