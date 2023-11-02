@@ -1,5 +1,4 @@
 const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
-const cron = require("node-cron");
 const { URL } = require("../config/constant");
 const prisma = require("../model/prisma");
 
