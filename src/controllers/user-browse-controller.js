@@ -1,4 +1,4 @@
-const prisma = require("../model/prisma");
+const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {

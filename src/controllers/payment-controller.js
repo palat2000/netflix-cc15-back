@@ -1,6 +1,6 @@
 const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 const { URL } = require("../config/constant");
-const prisma = require("../model/prisma");
+const prisma = require("../models/prisma");
 
 exports.payment = async (req, res, next) => {
   try {
