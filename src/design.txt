@@ -1,4 +1,14 @@
 ### AUTH-ROUTE ###
+
+CHECK EMAIL
+GET /auth/checkemail
+BODY email
+RESPONSE
+201 { emailKey, message }
+404 { message: String , email not found}
+500 { message: String}
+
+
 REGISTER
 POST /auth/register
 BODY email, password
