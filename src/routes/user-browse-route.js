@@ -2,7 +2,13 @@ const express = require("express");
 const router = express.Router();
 const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
+const checkSubscriptionStatusMiddleware = require("../middlewares/check-subscription-status");
 
-router.get("/", profileAuthenticate, userBrowseController.getMovie);
+router.get(
+  "/",
+  checkSubscriptionStatusMiddleware,
+  profileAuthenticate,
+  userBrowseController.getMovie
+);
 
 module.exports = router;
