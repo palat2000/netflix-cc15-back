@@ -115,7 +115,8 @@ exports.getMe = (req, res) => {
 
 exports.chooseProfile = async (req, res, next) => {
   try {
-    const payload = { userProfileId: userProfile.id };
+    console.log(req.body, "req body");
+    const payload = { userProfileId: req.body.id };
     const accessToken = jwt.sign(
       payload,
       process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
@@ -123,6 +124,14 @@ exports.chooseProfile = async (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE,
       }
     );
+
+    const userProfile = await prisma.userProfile.findFirst({
+      where: {
+        id: +req.body.id,
+      },
+    });
+
+    res.status(200).json({ accessToken, userProfile });
   } catch (error) {
     next(error);
   }
