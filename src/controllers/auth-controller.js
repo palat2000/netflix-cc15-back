@@ -64,7 +64,7 @@ exports.login = async (req, res, next) => {
     });
 
     if (!user) {
-      return next(createError("invalid credential", 400));
+      return next(createError("Sorry, we can't find an account with this email address. Please try again or create a new account. ", 400));
     }
 
     const isMatch = await bcrypt.compare(value.password, user.password);
@@ -75,7 +75,7 @@ exports.login = async (req, res, next) => {
     const payload = { userId: user.id };
     const accessToken = jwt.sign(
       payload,
-      process.env.JWT_SECRET_KEY || "1q2w3e4r5t6y7u8i9o0p",
+      process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
       {
         expiresIn: process.env.JWT_EXPIRE,
       }
