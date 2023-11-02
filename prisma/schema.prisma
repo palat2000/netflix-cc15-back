@@ -68,7 +68,7 @@ model MyList {
 model Movie {
   id             Int           @id @default(autoincrement())
   title          String
-  release_year   DateTime?
+  release_year   String        @db.VarChar(7)
   count_watching Int?
   count_liked    Int?
   detail         String?
@@ -78,7 +78,7 @@ model Movie {
   enumGenres     GenresSelect? @default(ACTION)
   myList         MyList[]
   history        History[]
-  actor          Actors[]
+  actors         Actors[]
   video          Video[]
 }
 
@@ -91,7 +91,8 @@ model Actors {
 
 model Video {
   id               Int    @id @default(autoincrement())
-  videoEpisodeName Int    @default(1)
+  videoEpisodeNo   Int    @default(1)
+  videoEpisodeName String
   videoUrl         String
   Movie            Movie? @relation(fields: [movieId], references: [id])
   movieId          Int?
