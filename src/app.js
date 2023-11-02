@@ -6,12 +6,9 @@ const rateLimitMiddleware = require("./middlewares/rate-limit");
 const errorMiddleware = require("./middlewares/error");
 const notFoundMiddleware = require("./middlewares/not-found");
 const authRoute = require("./routes/auth-route");
-<<<<<<< HEAD
 const paymentRoute = require("./routes/payment-route");
-=======
 const userBrowseRoute = require("./routes/user-browse-route");
 const userRoute = require("./routes/user-route");
->>>>>>> develop
 
 const app = express();
 const PORT = process.env.PORT || 8000;
