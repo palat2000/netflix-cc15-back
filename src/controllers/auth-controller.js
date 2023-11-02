@@ -76,8 +76,15 @@ exports.login = async (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE,
       }
     );
+
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
     delete user.password;
-    res.status(200).json({ accessToken, user });
+    res.status(200).json({ accessToken, user, allUserProfile });
   } catch (error) {
     next(error);
   }
