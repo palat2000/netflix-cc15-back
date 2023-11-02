@@ -54,15 +54,15 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { value, error } = loginSchema.validate(req.body);
-    console.log("dsdsd");
     if (error) {
       return next(error);
     }
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: value.emailOrMobile }, { mobile: value.emailOrMobile }],
-      },
+    const user = await prisma.user.findUnique({
+      where:{
+        email:value.email
+      }
     });
+
     if (!user) {
       return next(createError("invalid credential", 400));
     }
