@@ -8,20 +8,17 @@ module.exports = async (req, res, next) => {
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return next(createError("unauthenticated", 401));
     }
-
     const token = authorization.split(" ")[1];
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || "mnbvcxz");
-
-    let user = await prisma.user.findUnique({
+    const profile = await prisma.userProfile.findUnique({
       where: {
-        id: payload.userId,
+        id: payload.userProfileId,
       },
     });
-    if (!user) {
-      return next(createError("unauthenticated", 401));
+    if (!profile) {
+      return next(createError("profile not found", 401));
     }
-    delete user.password;
-    req.user = user;
+    req.profile = profile;
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
