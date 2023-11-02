@@ -54,21 +54,19 @@ exports.login = async (req, res, next) => {
     if (error) {
       return next(error);
     }
-<<<<<<< HEAD
-    let user = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: value.emailOrMobile }, { mobile: value.emailOrMobile }],
-      },
-=======
     const user = await prisma.user.findUnique({
-      where:{
-        email:value.email
-      }
->>>>>>> 20b8e82f1da7d0cbe4eeac07f504ede72ac31b2e
+      where: {
+        email: value.email,
+      },
     });
 
     if (!user) {
-      return next(createError("Sorry, we can't find an account with this email address. Please try again or create a new account. ", 400));
+      return next(
+        createError(
+          "Sorry, we can't find an account with this email address. Please try again or create a new account. ",
+          400
+        )
+      );
     }
 
     const isMatch = await bcrypt.compare(value.password, user.password);
