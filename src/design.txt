@@ -1,3 +1,4 @@
+### AUTH-ROUTE ###
 REGISTER
 POST /auth/register
 BODY email, password
@@ -30,6 +31,7 @@ RESPONSE
 400 { message: String }
 500 { message: String }
 
+### USER-ROUTE ###
 CREATE USER PROFILE
 POST /user/profile
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
@@ -54,4 +56,22 @@ RESPONSE
 400 { message: String, userProfileName is required, This userProfileName is already use }
 500 { message: String }
 
+GET MOVIE BYId
+GET /user-browse/movie/:movieId
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { movie, moreLikeThis }
+400 { message: String }
+500 { message: String}
+
+
+### ADMIN-ROUTE ###
+
+CREATE MOVIE
+POST /admin/
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE
+200 { }
+400 { message: String, Already add this movie name }
+500 { message: String}
 

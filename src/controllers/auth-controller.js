@@ -5,6 +5,34 @@ const createError = require("../utils/create-error");
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
 
+exports.checkEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const emailRegis = await prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+
+    let emailKey = "";
+    let message = "";
+
+    if (!emailRegis) {
+      throw createError("email not found", 404);
+    }
+    emailKey = emailRegis;
+    message = "email found";
+
+    res.status(200).json({ emailKey, message });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = registerSchema.validate(req.body);
