@@ -57,7 +57,7 @@ exports.addToMyList = async (req, res, next) => {
   try {
     const myList = await prisma.myList.create({
       data: {
-        movieId: +req.params.movieId,
+        movieId: +req.body.movieId,
         userProfileId: +req.userProfile.id,
       },
     });

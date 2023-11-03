@@ -12,7 +12,7 @@ router.get(
 );
 
 router.post(
-  "/movie/:movieId",
+  "/mylist",
   authenticateProfileMiddleware,
   userBrowseController.addToMyList
 );
