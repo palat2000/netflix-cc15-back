@@ -6,7 +6,8 @@ const fs = require("fs/promises");
 exports.createMovie = async (req, res, next) => {
   console.log("req.body", req.body);
   try {
-    const { title, release_year, detail, isTVShow, enumGenres } = req.body;
+    const { title, release_year, detail, isTVShow, enumGenres, actorName } =
+      req.body;
 
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
@@ -18,34 +19,77 @@ exports.createMovie = async (req, res, next) => {
       return next(createError("Already add this movie name", 400));
     }
     console.log(titleMovieDup);
+    console.log("sard");
+    console.log(req.files["image"][0].path, "meow");
+    console.log(req.files["trailer"][0].path, "meow");
 
-    if (req?.file?.path) {
-      const imageUrl = await upload(req.file.path);
+    let imageUrl;
+    let trailerUrl;
+
+    let body = {};
+
+    if (req?.files["image"]) {
+      imageUrl = await upload(req.files["image"][0].path);
       console.log(imageUrl);
-      body.profileImageUrl = imageUrl;
+      body.image = imageUrl;
     }
-
-    const body = {
+    if (req?.files["trailer"]) {
+      trailerUrl = await upload(req.files["trailer"][0].path);
+      console.log(trailerUrl);
+      body.trailer = trailerUrl;
+    }
+    body = {
+      ...body,
       title: title,
       release_year: release_year,
       detail: detail,
-      isTVShow: isTVShow,
-      image: imageUrl,
+      isTVShow: !!isTVShow,
       enumGenres: enumGenres,
-      trailer: trailer,
     };
 
-    const movie = await prisma.movie.create({
+    const createMovie = await prisma.movie.create({
       data: body,
     });
 
-    res.status(201).json({ message: "movie created", movie });
+    actorName.forEach(async (el) => {
+      const actors = await prisma.actors.createMany({
+        data: {
+          movieId: createMovie.id,
+          name: el,
+        },
+      });
+    });
+
+    const movie = await prisma.movie.findMany({
+      where: {
+        id: createMovie.id,
+      },
+      include: {
+        actors: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    res.status(201).json({ movie });
   } catch (error) {
+    console.log(error);
     next(error);
   } finally {
-    console.log("req", req);
-    if (req?.file?.path) {
-      fs.unlink(req?.file?.path);
+    if (req.files["image"][0].path) {
+      fs.unlink(req.files["image"][0].path);
     }
+    if (req.files["trailer"][0].path) {
+      fs.unlink(req.files["trailer"][0].path);
+    }
+  }
+};
+
+exports.deleteMovie = async (req, res, next) => {
+  try {
+    const { movieId } = req.body;
+  } catch (error) {
+    next(error);
   }
 };

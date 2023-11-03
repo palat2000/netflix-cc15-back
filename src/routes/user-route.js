@@ -2,9 +2,9 @@ const express = require("express");
 const userController = require("../controllers/user-controller");
 const router = express.Router();
 const authenticateMiddleware = require("../middlewares/authenticate");
+const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
 const upload = require("../middlewares/upload");
 
-// router.get("/profile", authentiscateMiddleware, userController.getProfile);
 router.post(
   "/profile",
   upload.single("profileImageUrl"),
@@ -13,14 +13,14 @@ router.post(
 );
 router.delete(
   "/profile",
-  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userController.deleteUserProfile
 );
 
 router.patch(
   "/profile",
   upload.single("profileImageUrl"),
-  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userController.editUserProfile
 );
 

@@ -6,8 +6,11 @@ const upload = require("../middlewares/upload");
 
 router.post(
   "/",
-  upload.single("image"),
   authenticateMiddleware,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "trailer", maxCount: 1 },
+  ]),
   adminController.createMovie
 );
 
