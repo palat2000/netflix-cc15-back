@@ -62,24 +62,35 @@ exports.editMyList = async (req, res, next) => {
       },
     });
 
+    let likeAndUnLikeList = null;
     let myList = null;
 
     if (findMyList) {
-      myList = await prisma.myList.delete({
+      likeAndUnLikeList = await prisma.myList.delete({
         where: {
           id: +findMyList.id,
         },
       });
     } else {
-      myList = await prisma.myList.create({
+      likeAndUnLikeList = await prisma.myList.create({
         data: {
           movieId: +req.body.movieId,
           userProfileId: +req.userProfile.id,
         },
       });
+
+      myList = await prisma.myList.findMany({
+        where: {
+          userProfileId: +req.userProfile.id,
+        },
+        select: {
+          movieId: true,
+          movie: true,
+        },
+      });
     }
 
-    res.status(201).json({ myList });
+    res.status(201).json({ likeAndUnLikeList, myList });
   } catch (error) {
     next(error);
   }
