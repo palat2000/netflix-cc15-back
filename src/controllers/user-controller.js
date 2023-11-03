@@ -28,6 +28,7 @@ exports.createUserProfile = async (req, res, next) => {
     };
 
     if (req?.file?.path) {
+      console.log("sssss")
       const imageUrl = await upload(req.file.path);
       console.log(imageUrl);
       body.profileImageUrl = imageUrl;
@@ -80,6 +81,7 @@ exports.deleteUserProfile = async (req, res, next) => {
 exports.editUserProfile = async (req, res, next) => {
   try {
     console.log(req.body, "req.body");
+
     const { userProfileName, userProfileId, userId } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
@@ -102,7 +104,7 @@ exports.editUserProfile = async (req, res, next) => {
     }
     const dupUserProfileNameWithUserId = await prisma.userProfile.findMany({
       where: {
-        AND: [{ userId: +userId }, { userProfileName: userProfileName }],
+        AND: [{ userId: req.user.id }, { userProfileName: userProfileName }],
         NOT: dupUserProfileNameWithUserProfileId
           ? [
               {
@@ -131,8 +133,8 @@ exports.editUserProfile = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (req?.file?.path) {
-      fs.unlink(req?.file?.path);
-    }
+    // if (req?.file?.path) {
+    //   fs.unlink(req?.file?.path);
+    // }
   }
 };

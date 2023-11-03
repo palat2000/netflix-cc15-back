@@ -5,6 +5,7 @@ const storage = multer.diskStorage({
     cb(null, "public");
   },
   filename: (req, file, cb) => {
+   
     const split = file.originalname.split(".");
     cb(
       null,
@@ -14,6 +15,7 @@ const storage = multer.diskStorage({
         "." +
         split[split.length - 1]
     );
+    
   },
 });
 

@@ -18,6 +18,7 @@ app.use(morgan("combined"));
 app.use(rateLimitMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static('public'))
 
 app.use("/auth", authRoute);
 app.use("/payment", paymentRoute);
