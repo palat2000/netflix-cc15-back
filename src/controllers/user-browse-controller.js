@@ -40,12 +40,47 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
     console.log(enumGenres);
+
     const moreLikeThis = await prisma.movie.findMany({
-      where: enumGenres,
+      where: {
+        AND: [{ NOT: { id: +movieId } }, { enumGenres: enumGenres.enumGenres }],
+      },
     });
 
     res.status(200).json({ movie, moreLikeThis });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.addToMyList = async (req, res, next) => {
+  try {
+    const myList = await prisma.myList.create({
+      data: {
+        movieId: +req.params.movieId,
+        userProfileId: +req.userProfile.id,
+      },
+    });
+    res.status(201).json({ myList });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMyList = async (req, res, next) => {
+  try {
+    // const myList = await prisma.myList.findMany({
+    //   where: {
+    //     userProfileId: +req.userProfile.id,
+    //   },
+    //   select : }
+
+    //   include: {
+    //     movie: true,
+    //   },
+    // });
+    res.status(200).json({ myList });
+  } catch (error) {
+    next(error);
   }
 };
