@@ -53,14 +53,32 @@ exports.getMovieById = async (req, res, next) => {
   }
 };
 
-exports.addToMyList = async (req, res, next) => {
+exports.editMyList = async (req, res, next) => {
   try {
-    const myList = await prisma.myList.create({
-      data: {
+    const findMyList = await prisma.myList.findFirst({
+      where: {
         movieId: +req.body.movieId,
         userProfileId: +req.userProfile.id,
       },
     });
+
+    let myList = null;
+
+    if (findMyList) {
+      myList = await prisma.myList.delete({
+        where: {
+          id: +findMyList.id,
+        },
+      });
+    } else {
+      myList = await prisma.myList.create({
+        data: {
+          movieId: +req.body.movieId,
+          userProfileId: +req.userProfile.id,
+        },
+      });
+    }
+
     res.status(201).json({ myList });
   } catch (error) {
     next(error);
@@ -79,28 +97,6 @@ exports.getMyList = async (req, res, next) => {
       },
     });
     res.status(200).json({ myList });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.deleteMyList = async (req, res, next) => {
-  try {
-    console.log(req.body, "here--------");
-    const findListId = await prisma.myList.findFirst({
-      where: {
-        movieId: +req.body.movieId,
-        userProfileId: +req.userProfile.id,
-      },
-    });
-    console.log(findListId);
-    const deleteMovieinMyList = await prisma.myList.delete({
-      where: {
-        id: +findListId.id,
-      },
-    });
-
-    res.status(200).json({ deleteMovieinMyList });
   } catch (error) {
     next(error);
   }

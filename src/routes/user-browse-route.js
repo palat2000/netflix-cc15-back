@@ -14,7 +14,7 @@ router.get(
 router.post(
   "/mylist",
   authenticateProfileMiddleware,
-  userBrowseController.addToMyList
+  userBrowseController.editMyList
 );
 
 router.get(
@@ -23,9 +23,4 @@ router.get(
   userBrowseController.getMyList
 );
 
-router.delete(
-  "/mylist",
-  authenticateProfileMiddleware,
-  userBrowseController.deleteMyList
-);
 module.exports = router;
