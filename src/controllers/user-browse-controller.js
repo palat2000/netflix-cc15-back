@@ -69,17 +69,38 @@ exports.addToMyList = async (req, res, next) => {
 
 exports.getMyList = async (req, res, next) => {
   try {
-    // const myList = await prisma.myList.findMany({
-    //   where: {
-    //     userProfileId: +req.userProfile.id,
-    //   },
-    //   select : }
-
-    //   include: {
-    //     movie: true,
-    //   },
-    // });
+    const myList = await prisma.myList.findMany({
+      where: {
+        userProfileId: +req.userProfile.id,
+      },
+      select: {
+        movieId: true,
+        movie: true,
+      },
+    });
     res.status(200).json({ myList });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteMyList = async (req, res, next) => {
+  try {
+    console.log(req.body, "here--------");
+    const findListId = await prisma.myList.findFirst({
+      where: {
+        movieId: +req.body.movieId,
+        userProfileId: +req.userProfile.id,
+      },
+    });
+    console.log(findListId);
+    const deleteMovieinMyList = await prisma.myList.delete({
+      where: {
+        id: +findListId.id,
+      },
+    });
+
+    res.status(200).json({ deleteMovieinMyList });
   } catch (error) {
     next(error);
   }

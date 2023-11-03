@@ -23,4 +23,9 @@ router.get(
   userBrowseController.getMyList
 );
 
+router.delete(
+  "/mylist",
+  authenticateProfileMiddleware,
+  userBrowseController.deleteMyList
+);
 module.exports = router;
