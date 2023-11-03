@@ -101,3 +101,57 @@ exports.getMyList = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.addLike = async (req, res, next) => {
+  try {
+    const countLike = await prisma.movie.findFirst({
+      where: {
+        id: +req.body.movieId,
+      },
+      select: {
+        count_liked: true,
+      },
+    });
+    console.log(countLike);
+
+    const like = await prisma.movie.update({
+      where: {
+        id: +req.body.movieId,
+      },
+      data: {
+        count_liked: countLike.count_liked + 1,
+      },
+    });
+
+    res.status(201).json({ like });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.unLike = async (req, res, next) => {
+  try {
+    const countLike = await prisma.movie.findFirst({
+      where: {
+        id: +req.body.movieId,
+      },
+      select: {
+        count_liked: true,
+      },
+    });
+    console.log(countLike);
+
+    const like = await prisma.movie.update({
+      where: {
+        id: +req.body.movieId,
+      },
+      data: {
+        count_liked: countLike.count_liked - 1,
+      },
+    });
+
+    res.status(201).json({ like });
+  } catch (error) {
+    next(error);
+  }
+};
