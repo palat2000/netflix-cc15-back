@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
+const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
 
 router.get("/", authenticateMiddleware, userBrowseController.getMovie);
 router.get(
@@ -9,4 +10,17 @@ router.get(
   authenticateMiddleware,
   userBrowseController.getMovieById
 );
+
+router.post(
+  "/mylist",
+  authenticateProfileMiddleware,
+  userBrowseController.editMyList
+);
+
+router.get(
+  "/mylist",
+  authenticateProfileMiddleware,
+  userBrowseController.getMyList
+);
+
 module.exports = router;

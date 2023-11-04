@@ -49,12 +49,64 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
     console.log(enumGenres);
+
     const moreLikeThis = await prisma.movie.findMany({
-      where: enumGenres,
+      where: {
+        AND: [{ NOT: { id: +movieId } }, { enumGenres: enumGenres.enumGenres }],
+      },
     });
 
     res.status(200).json({ movie, moreLikeThis });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.editMyList = async (req, res, next) => {
+  try {
+    const findMyList = await prisma.myList.findFirst({
+      where: {
+        movieId: +req.body.movieId,
+        userProfileId: +req.userProfile.id,
+      },
+    });
+
+    let myList = null;
+
+    if (findMyList) {
+      myList = await prisma.myList.delete({
+        where: {
+          id: +findMyList.id,
+        },
+      });
+    } else {
+      myList = await prisma.myList.create({
+        data: {
+          movieId: +req.body.movieId,
+          userProfileId: +req.userProfile.id,
+        },
+      });
+    }
+
+    res.status(201).json({ myList });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMyList = async (req, res, next) => {
+  try {
+    const myList = await prisma.myList.findMany({
+      where: {
+        userProfileId: +req.userProfile.id,
+      },
+      select: {
+        movieId: true,
+        movie: true,
+      },
+    });
+    res.status(200).json({ myList });
+  } catch (error) {
+    next(error);
   }
 };
