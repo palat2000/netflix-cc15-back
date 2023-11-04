@@ -102,20 +102,6 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return next(createError("Incorrect password. Please try again. ", 400));
     }
-    const subscription = await stripe.subscriptions.retrieve(
-      user.subscriptionId
-    );
-    if (subscription.status !== "active") {
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          isActive: false,
-        },
-      });
-      user.isActive = false;
-    }
     const payload = { userId: user.id };
     const accessToken = jwt.sign(
       payload,

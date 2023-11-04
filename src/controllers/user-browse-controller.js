@@ -1,4 +1,3 @@
-const prisma = require("../models/prisma");
 const getMovieKids = require("../services/get-movie-kids");
 const getMovie = require("../services/get-movie");
 
