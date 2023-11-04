@@ -12,8 +12,8 @@ router.post(
   userController.createUserProfile
 );
 router.delete(
-  "/profile",
-  authenticateProfileMiddleware,
+  "/profile/:profileId",
+  authenticateMiddleware,
   userController.deleteUserProfile
 );
 
