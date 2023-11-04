@@ -5,6 +5,34 @@ const createError = require("../utils/create-error");
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
 
+exports.checkEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const emailRegis = await prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+
+    let emailKey = "";
+    let message = "";
+
+    if (!emailRegis) {
+      throw createError("email not found", 404);
+    }
+    emailKey = emailRegis;
+    message = "email found";
+
+    res.status(200).json({ emailKey, message });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = registerSchema.validate(req.body);
@@ -38,6 +66,7 @@ exports.register = async (req, res, next) => {
         userProfileName: "Kids",
         favoriteGenres: "KID",
         profileImageUrl: null,
+        isKid: true,
         userId: +user.id,
       },
     });
@@ -115,7 +144,8 @@ exports.getMe = (req, res) => {
 
 exports.chooseProfile = async (req, res, next) => {
   try {
-    const payload = { userProfileId: userProfile.id };
+    console.log(req.body, "req body");
+    const payload = { userProfileId: req.body.id };
     const accessToken = jwt.sign(
       payload,
       process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
@@ -123,6 +153,14 @@ exports.chooseProfile = async (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE,
       }
     );
+
+    const userProfile = await prisma.userProfile.findFirst({
+      where: {
+        id: +req.body.id,
+      },
+    });
+
+    res.status(200).json({ accessToken, userProfile });
   } catch (error) {
     next(error);
   }

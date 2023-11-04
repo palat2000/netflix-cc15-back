@@ -1,3 +1,14 @@
+### AUTH-ROUTE ###
+
+CHECK EMAIL
+GET /auth/checkemail
+BODY email
+RESPONSE
+201 { emailKey, message }
+404 { message: String , email not found}
+500 { message: String}
+
+
 REGISTER
 POST /auth/register
 BODY email, password
@@ -19,118 +30,58 @@ GET /auth/me
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
 RESPONSE
 200 { user }
-401 { message: String }
+400 { message: String }
 500 { message: String }
 
+CHOOSE USER PROFILE
+GET /auth/profile
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { accessToken(of userProfileID), userProfile }
+400 { message: String }
+500 { message: String }
+
+### USER-ROUTE ###
 CREATE USER PROFILE
 POST /user/profile
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
 RESPONSE 
-200 {}
-401 {}
-500 {}
+201 { message: String, userProfile}
+400 { message: String, Already add this profile name }
+500 { message: String }
 
-
-UPDATE PROFILE/COVER IMAGE
-PATCH /user
+DELETE USER PROFILE
+DELETE /user/profile
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-BODY profileImage?, coverImage?
-RESPONSE
-200 { profileImage?: String, coverImage?: String }
+RESPONSE 
+200 { message: String, deleteUserProfile}
 400 { message: String }
-401 { message: String }
 500 { message: String }
 
-GET USER PROFILE BY id
-GET /user/:userId
+EDIT USER PROFILE
+PATCH /user/profile
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { 
-  user: { id: Number, firstName: String, ... }, 
-  status: String, 
-  friends: [ {id: Number, firstName: String, ...} ] 
-}
-401 { message: String }
+RESPONSE 
+200 { message: String, newUserProfileName}
+400 { message: String, userProfileName is required, This userProfileName is already use }
 500 { message: String }
 
-REQUEST FRIEND
-POST /friend/:receiverId
+GET MOVIE BYId
+GET /user-browse/movie/:movieId
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
+RESPONSE 
+200 { movie, moreLikeThis }
 400 { message: String }
-401 { message: String }
-500 { message: String }
+500 { message: String}
 
-REJECT REQUEST
-DELETE /friend/:requesterId/reject
+
+### ADMIN-ROUTE ###
+
+CREATE MOVIE
+POST /admin/
 HEADER AUTHORIZATION Bearer ACCESS_TOKEN
 RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
+200 { }
+400 { message: String, Already add this movie name }
+500 { message: String}
 
-CANCEL REQUEST
-DELETE /friend/:receiverId/cancel
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-UNFRIEND
-DELETE /friend/:friendId/unfriend
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-ACCEPT FRIEND
-PATCH /friend/:requesterId
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-CREATE POST
-POST /post
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-BODY message?, image?
-RESPONSE
-201 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-GET ALL POST INCLUDE POST FRIENDS
-GET /post/friend
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { posts: [ { id: Number, message: String, image: String, user: { id: Number, firtsName: String, ... } } ] }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-TOGGLE LIKE
-POST /post/:postId/like
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
-
-DELETE POST
-DELETE /post/:postId
-HEADER AUTHORIZATION Bearer ACCESS_TOKEN
-RESPONSE
-200 { message: String }
-400 { message: String }
-401 { message: String }
-500 { message: String }
