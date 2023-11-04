@@ -23,4 +23,16 @@ router.get(
   userBrowseController.getMyList
 );
 
+router.patch(
+  "/Like",
+  authenticateProfileMiddleware,
+  userBrowseController.addLike
+);
+
+router.patch(
+  "/unlike",
+  authenticateProfileMiddleware,
+  userBrowseController.unLike
+);
+
 module.exports = router;

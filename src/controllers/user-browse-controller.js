@@ -71,24 +71,35 @@ exports.editMyList = async (req, res, next) => {
       },
     });
 
+    let likeAndUnLikeList = null;
     let myList = null;
 
     if (findMyList) {
-      myList = await prisma.myList.delete({
+      likeAndUnLikeList = await prisma.myList.delete({
         where: {
           id: +findMyList.id,
         },
       });
     } else {
-      myList = await prisma.myList.create({
+      likeAndUnLikeList = await prisma.myList.create({
         data: {
           movieId: +req.body.movieId,
           userProfileId: +req.userProfile.id,
         },
       });
+
+      myList = await prisma.myList.findMany({
+        where: {
+          userProfileId: +req.userProfile.id,
+        },
+        select: {
+          movieId: true,
+          movie: true,
+        },
+      });
     }
 
-    res.status(201).json({ myList });
+    res.status(201).json({ likeAndUnLikeList, myList });
   } catch (error) {
     next(error);
   }
@@ -106,6 +117,60 @@ exports.getMyList = async (req, res, next) => {
       },
     });
     res.status(200).json({ myList });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addLike = async (req, res, next) => {
+  try {
+    const countLike = await prisma.movie.findFirst({
+      where: {
+        id: +req.body.movieId,
+      },
+      select: {
+        count_liked: true,
+      },
+    });
+    console.log(countLike);
+
+    const like = await prisma.movie.update({
+      where: {
+        id: +req.body.movieId,
+      },
+      data: {
+        count_liked: countLike.count_liked + 1,
+      },
+    });
+
+    res.status(201).json({ like });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.unLike = async (req, res, next) => {
+  try {
+    const countLike = await prisma.movie.findFirst({
+      where: {
+        id: +req.body.movieId,
+      },
+      select: {
+        count_liked: true,
+      },
+    });
+    console.log(countLike);
+
+    const like = await prisma.movie.update({
+      where: {
+        id: +req.body.movieId,
+      },
+      data: {
+        count_liked: countLike.count_liked - 1,
+      },
+    });
+
+    res.status(201).json({ like });
   } catch (error) {
     next(error);
   }
