@@ -54,15 +54,15 @@ model History {
   movieId       Int?
   enumGenres    GenresSelect
   userProfileId Int
-  UserProfile   UserProfile  @relation(fields: [userProfileId], references: [id])
+  userProfile   UserProfile  @relation(fields: [userProfileId], references: [id])
 }
 
 model MyList {
   id            Int          @id @default(autoincrement())
-  UserProfile   UserProfile? @relation(fields: [userAccountId], references: [id])
-  userAccountId Int?
+  UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfileId Int?
   movieId       Int
-  Movie         Movie        @relation(fields: [movieId], references: [id])
+  movie         Movie        @relation(fields: [movieId], references: [id])
 }
 
 model Movie {
