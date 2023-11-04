@@ -50,9 +50,17 @@ exports.subscription = async (req, res, next) => {
         customerID: subscription.customer,
         subscriptionId: subscription.id,
         isActive: true,
+        expiredDate: subscription.current_period_end,
       },
       where: {
         id: req.user.id,
+      },
+    });
+    await prisma.paymentHistory.create({
+      data: {
+        paymentDate: new Date(),
+        transaction: session.id,
+        userId: req.user.id,
       },
     });
     res.status(200).json({ message: "OK" });
