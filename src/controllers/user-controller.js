@@ -19,7 +19,6 @@ exports.createUserProfile = async (req, res, next) => {
     }
     console.log(userProfileNameDup);
     if (isKid) favoriteGenres = "KID";
-
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,
@@ -62,25 +61,10 @@ exports.deleteUserProfile = async (req, res, next) => {
   }
 };
 
-// exports.getProfile = async (req, res, next) => {
-//   console.log(req.body, "body");
-//   try {
-//     const { userProfileId } = req.body;
-//     const userProfile = await prisma.userProfile.findFirst({
-//       where: {
-//         id: userProfileId,
-//       },
-//     });
-//     res.status(200).json({ userProfile });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 exports.editUserProfile = async (req, res, next) => {
   try {
     console.log(req.body, "req.body");
-    const { userProfileName, userProfileId, userId } = req.body;
+    const { userProfileName } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
     }
@@ -93,7 +77,10 @@ exports.editUserProfile = async (req, res, next) => {
     const dupUserProfileNameWithUserProfileId =
       await prisma.userProfile.findFirst({
         where: {
-          AND: [{ id: +userProfileId }, { userProfileName: userProfileName }],
+          AND: [
+            { id: +req.userProfile.id },
+            { userProfileName: userProfileName },
+          ],
         },
       });
 
@@ -102,7 +89,10 @@ exports.editUserProfile = async (req, res, next) => {
     }
     const dupUserProfileNameWithUserId = await prisma.userProfile.findMany({
       where: {
-        AND: [{ userId: +userId }, { userProfileName: userProfileName }],
+        AND: [
+          { userId: +req.userProfile.userId },
+          { userProfileName: userProfileName },
+        ],
         NOT: dupUserProfileNameWithUserProfileId
           ? [
               {
@@ -120,14 +110,14 @@ exports.editUserProfile = async (req, res, next) => {
       body.profileImageUrl = imageUrl;
     }
 
-    const newUserProfileName = await prisma.userProfile.update({
+    const userProfile = await prisma.userProfile.update({
       where: {
-        id: +userProfileId,
+        id: +req.userProfile.id,
       },
       data: body,
     });
 
-    res.status(200).json({ message: "userProfile edited", newUserProfileName });
+    res.status(200).json({ userProfile });
   } catch (error) {
     next(error);
   } finally {
