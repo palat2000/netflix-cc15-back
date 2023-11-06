@@ -52,7 +52,7 @@ exports.createUserProfile = async (req, res, next) => {
 
 exports.deleteUserProfile = async (req, res, next) => {
   try {
-
+    console.log("delete")
     const { profileId } = req.params;
 
 

@@ -109,8 +109,13 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.getMe = (req, res) => {
-  res.status(200).json({ user: req.user });
+exports.getMe = async (req, res) => {
+  const allUserProfile = await prisma.userProfile.findMany({
+    where: {
+      userId: req.user.id,
+    },
+  });
+  res.status(200).json({ user: {...req.user,allUserProfile} });
 };
 
 exports.chooseProfile = async (req, res, next) => {
