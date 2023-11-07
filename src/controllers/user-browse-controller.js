@@ -1,5 +1,6 @@
 const getMovieKids = require("../services/get-movie-kids");
 const getMovie = require("../services/get-movie");
+const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {

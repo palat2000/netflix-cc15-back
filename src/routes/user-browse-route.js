@@ -12,10 +12,11 @@ router.get(
   authenticateMiddleware,
   userBrowseController.getMovieById
 );
+
 router.get(
   "/",
-  checkSubscriptionStatusMiddleware,
   profileAuthenticate,
+  checkSubscriptionStatusMiddleware,
   userBrowseController.getMovie
 );
 

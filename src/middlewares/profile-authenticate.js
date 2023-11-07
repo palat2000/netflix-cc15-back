@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || "mnbvcxz");
     const profile = await prisma.userProfile.findUnique({
       where: {
-        id: payload.userProfileId,
+        id: payload.userId,
       },
     });
     if (!profile) {
