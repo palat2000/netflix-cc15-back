@@ -23,4 +23,10 @@ router.get(
   userBrowseController.getMyList
 );
 
+router.get(
+  "/search",
+  authenticateProfileMiddleware,
+  userBrowseController.searchBar
+);
+
 module.exports = router;

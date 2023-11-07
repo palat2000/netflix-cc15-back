@@ -101,3 +101,49 @@ exports.getMyList = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.searchBar = async (req, res, next) => {
+  try {
+    const searchTerm = req.query.q;
+    console.log(searchTerm);
+    const searchMovieBytitle = await prisma.movie.findMany({
+      where: {
+        title: {
+          contains: searchTerm,
+        },
+      },
+    });
+
+    const genres = ["COMEDIES", "ACTION", "HORROR", "SPORTS", "KID", "ROMANCE"];
+
+    const filterArrayGenres = genres.filter((element) => {
+      return element.includes(searchTerm.toU);
+    });
+
+    console.log(filterArrayGenres, "here");
+    let searchMovieByGenres = null;
+
+    if (filterArrayGenres.length > 0) {
+      searchMovieByGenres = await prisma.movie.findMany({
+        where: {
+          enumGenres: filterArrayGenres[0],
+        },
+      });
+    }
+
+    // const searchByActorName = await prisma.actors.findMany({
+    //   where: {
+    //     name: {
+    //       contains: searchTerm,
+    //     },
+    //   },
+    //   include: {
+    //     movie: true,
+    //   },
+    // });
+
+    res.status(200).json({ searchMovieBytitle, searchMovieByGenres });
+  } catch (error) {
+    next(error);
+  }
+};
