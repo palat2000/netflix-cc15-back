@@ -21,6 +21,11 @@ const upload = require("../middlewares/upload");
 //   adminController.createMovie
 // );
 
-router.post("/",authenticateMiddleware)
+router.post(
+  "/",
+  // authenticateMiddleware,
+  upload.single("file"),
+  adminController.addMovie
+);
 
 module.exports = router;
