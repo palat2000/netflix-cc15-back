@@ -3,6 +3,7 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
+const readXLSXFile = require("../services/read-xlsx-file");
 
 exports.createMovie = async (req, res, next) => {
   console.log("req.body", req.body);
@@ -101,40 +102,8 @@ exports.addMovie = async (req, res, next) => {
     const sheetNames = file.SheetNames;
     const worksheet = file.Sheets[sheetNames[0]];
     const data = XLSX.utils.sheet_to_json(worksheet);
-    const moviesMap = new Map();
-    const movieObj = {};
-    data.forEach((row) => {
-      const title = row.title;
-      const existingMovie = moviesMap.get(title);
-      if (existingMovie) {
-        existingMovie.video.push({
-          videoEpisodeName: row.videoEpisodeName,
-          videoEpisodeNo: row.videoEpisodeNo,
-          video: row.video,
-        });
-      } else {
-        const actorName = row.actorName.split(",").map((name) => name.trim());
-        const movie = {
-          title: title,
-          isTVShow: row.isTVShow === "true",
-          image: row.image || null,
-          release_year: row.release_year || null,
-          genres: row.genres || null,
-          trailer: row.trailer || null,
-          detail: row.detail,
-          actorName,
-          video: [
-            {
-              videoEpisodeName: row.videoEpisodeName,
-              videoEpisodeNo: row.videoEpisodeNo,
-              video: row.video,
-            },
-          ],
-        };
-        moviesMap.set(title, movie);
-      }
-    });
-    const formattedData = [...moviesMap.values()];
+    const formattedData = readXLSXFile(data);
+
     res.json({ formattedData });
   } catch (err) {
     next(err);
