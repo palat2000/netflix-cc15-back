@@ -117,7 +117,7 @@ exports.searchBar = async (req, res, next) => {
     const genres = ["COMEDIES", "ACTION", "HORROR", "SPORTS", "KID", "ROMANCE"];
 
     const filterArrayGenres = genres.filter((element) => {
-      return element.includes(searchTerm);
+      return element.toLocaleLowerCase().includes(searchTerm);
     });
 
     console.log(filterArrayGenres, "here");
@@ -138,11 +138,7 @@ exports.searchBar = async (req, res, next) => {
         },
       },
       include: {
-        movieId: {
-          select: {
-            title: true,
-          },
-        },
+        movie: true,
       },
     });
 

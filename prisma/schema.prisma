@@ -76,16 +76,14 @@ model Movie {
   trailer        String?
   enumGenres     GenresSelect? @default(ACTION)
   myList         MyList[]
-  actors         Actors[]
-  video          Video[]
-  actorMovie     ActorMovie[]
+
+  video      Video[]
+  actorMovie ActorMovie[]
 }
 
 model Actors {
   id         Int          @id @default(autoincrement())
   name       String
-  movie      Movie?       @relation(fields: [movieId], references: [id])
-  movieId    Int?
   actorMovie ActorMovie[]
 }
 
