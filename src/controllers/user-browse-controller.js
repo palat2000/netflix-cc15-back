@@ -30,9 +30,13 @@ exports.getMovieById = async (req, res, next) => {
         image: true,
         enumGenres: true,
         trailer: true,
-        actors: {
+        actorMovie: {
           select: {
-            name: true,
+            actors: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
         video: {},
