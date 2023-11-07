@@ -138,9 +138,9 @@ exports.searchBar = async (req, res, next) => {
         },
       },
       include: {
-        movie: {
+        movieId: {
           select: {
-            $scalars: true,
+            title: true,
           },
         },
       },
