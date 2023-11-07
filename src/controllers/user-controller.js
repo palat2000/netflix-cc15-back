@@ -4,7 +4,6 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 
 exports.createUserProfile = async (req, res, next) => {
-  // console.log("req.body", req.body);
   console.log("createeeee hereeee")
   try {
     const { userProfileName, isKid, userId } = req.body;
@@ -18,7 +17,6 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-    // console.log(userProfileNameDup);
     if (isKid) favoriteGenres = "KID";
 
     const body = {
@@ -29,9 +27,7 @@ exports.createUserProfile = async (req, res, next) => {
     };
 
     if (req?.file?.path) {
-      // console.log("sssss")
       const imageUrl = await upload(req.file.path);
-      // console.log(imageUrl);
       body.profileImageUrl = imageUrl;
     }
 
@@ -86,7 +82,11 @@ exports.editUserProfile = async (req, res, next) => {
   try {
     // console.log(req.body, "req.body");
 
+    
     const { userProfileName, userProfileId, userId } = req.body;
+    console.log("userProfileName",userProfileName)
+    console.log('userProfileId', userProfileId)
+    console.log('userId', userId)
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
     }
