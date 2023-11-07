@@ -117,7 +117,7 @@ exports.searchBar = async (req, res, next) => {
     const genres = ["COMEDIES", "ACTION", "HORROR", "SPORTS", "KID", "ROMANCE"];
 
     const filterArrayGenres = genres.filter((element) => {
-      return element.includes(searchTerm.toU);
+      return element.includes(searchTerm);
     });
 
     console.log(filterArrayGenres, "here");
@@ -131,18 +131,24 @@ exports.searchBar = async (req, res, next) => {
       });
     }
 
-    // const searchByActorName = await prisma.actors.findMany({
-    //   where: {
-    //     name: {
-    //       contains: searchTerm,
-    //     },
-    //   },
-    //   include: {
-    //     movie: true,
-    //   },
-    // });
+    const searchByActorName = await prisma.actors.findMany({
+      where: {
+        name: {
+          contains: searchTerm,
+        },
+      },
+      include: {
+        movie: {
+          select: {
+            $scalars: true,
+          },
+        },
+      },
+    });
 
-    res.status(200).json({ searchMovieBytitle, searchMovieByGenres });
+    res
+      .status(200)
+      .json({ searchMovieBytitle, searchMovieByGenres, searchByActorName });
   } catch (error) {
     next(error);
   }
