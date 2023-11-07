@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
     let subscription;
 
     if (!subscriptionId) {
-      return next(createError("Payment Expired", 401))
+      return next(createError("Payment Expired", 402))
     }
 
     if (subscriptionId) {
@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
         },
       });
       req.user.isActive = false;
-      return next(createError("Payment Expired", 401))
+      return next(createError("Payment Expired", 402))
     }
     next();
   } catch (err) {
