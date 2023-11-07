@@ -14,7 +14,7 @@ const upload = require("../middlewares/upload");
 //   adminController.createMovie
 // );
 
-router.post("/", adminController.createMovie);
+router.post("/", adminController.quickAdd);
 
 // router.post(
 //   "/",
