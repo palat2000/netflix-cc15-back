@@ -1,14 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const authenticateMiddleware = require("../middlewares/authenticate");
+const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
+const checkSubscriptionStatusMiddleware = require("../middlewares/check-subscription-status");
 const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
 
-router.get("/", authenticateMiddleware, userBrowseController.getMovie);
 router.get(
   "/movie/:movieId",
-  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userBrowseController.getMovieById
+);
+router.get(
+  "/",
+  checkSubscriptionStatusMiddleware,
+  profileAuthenticate,
+  userBrowseController.getMovie
 );
 
 router.post(
@@ -27,6 +33,17 @@ router.get(
   "/search/",
   authenticateProfileMiddleware,
   userBrowseController.searchBar
+);
+router.patch(
+  "/Like",
+  authenticateProfileMiddleware,
+  userBrowseController.addLike
+);
+
+router.patch(
+  "/unlike",
+  authenticateProfileMiddleware,
+  userBrowseController.unLike
 );
 
 module.exports = router;

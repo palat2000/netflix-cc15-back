@@ -93,3 +93,53 @@ exports.deleteMovie = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.quickAdd = async (req, res, next) => {
+  try {
+    const {
+      title,
+      release_year,
+      detail,
+      isTVShow,
+      enumGenres,
+      actorName,
+      image,
+      trailer,
+    } = req.body;
+    const body = {
+      title,
+      release_year,
+      detail,
+      isTVShow: !!isTVShow,
+      enumGenres,
+      image,
+      trailer,
+    };
+    const createMovie = await prisma.movie.create({
+      data: body,
+    });
+    actorName.forEach(async (el) => {
+      await prisma.actors.createMany({
+        data: {
+          movieId: createMovie.id,
+          name: el,
+        },
+      });
+    });
+    const movie = await prisma.movie.findMany({
+      where: {
+        id: createMovie.id,
+      },
+      include: {
+        actors: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    res.status(200).json({ movie });
+  } catch (err) {
+    next(err);
+  }
+};

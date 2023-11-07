@@ -1,6 +1,7 @@
 const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 const { URL } = require("../config/constant");
 const prisma = require("../models/prisma");
+const createError = require("../utils/create-error");
 
 exports.payment = async (req, res, next) => {
   try {
@@ -29,6 +30,17 @@ exports.payment = async (req, res, next) => {
 exports.subscription = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
+    if (!user) {
+      return next(createError("user not found", 400));
+    }
+    if (user.isActive) {
+      return res.status(200).json({ message: "still active" });
+    }
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
@@ -38,13 +50,24 @@ exports.subscription = async (req, res, next) => {
         customerID: subscription.customer,
         subscriptionId: subscription.id,
         isActive: true,
+        expiredDate: subscription.current_period_end,
       },
       where: {
         id: req.user.id,
       },
     });
+    await prisma.paymentHistory.create({
+      data: {
+        paymentDate: new Date(),
+        transaction: session.id,
+        userId: req.user.id,
+      },
+    });
     res.status(200).json({ message: "OK" });
   } catch (err) {
+    if (err.name === "Error") {
+      err.statusCode = 400;
+    }
     next(err);
   }
 };

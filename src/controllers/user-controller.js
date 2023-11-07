@@ -4,7 +4,8 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 
 exports.createUserProfile = async (req, res, next) => {
-  console.log("req.body", req.body);
+  // console.log("req.body", req.body);
+  console.log("createeeee hereeee");
   try {
     const { userProfileName, isKid, userId } = req.body;
     const userProfileNameDup = await prisma.userProfile.findFirst({
@@ -17,7 +18,7 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-    console.log(userProfileNameDup);
+    // console.log(userProfileNameDup);
     if (isKid) favoriteGenres = "KID";
     const body = {
       userProfileName: userProfileName,
@@ -27,8 +28,9 @@ exports.createUserProfile = async (req, res, next) => {
     };
 
     if (req?.file?.path) {
+      // console.log("sssss")
       const imageUrl = await upload(req.file.path);
-      console.log(imageUrl);
+      // console.log(imageUrl);
       body.profileImageUrl = imageUrl;
     }
 
@@ -40,7 +42,7 @@ exports.createUserProfile = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    console.log("req", req);
+    // console.log("req", req);
     if (req?.file?.path) {
       fs.unlink(req?.file?.path);
     }
@@ -49,10 +51,11 @@ exports.createUserProfile = async (req, res, next) => {
 
 exports.deleteUserProfile = async (req, res, next) => {
   try {
-    const { userProfileId } = req.body;
+    const { profileId } = req.params;
+
     const deleteUserProfile = await prisma.userProfile.delete({
       where: {
-        id: +userProfileId,
+        id: +profileId,
       },
     });
     res.status(200).json({ message: "userProfile deleted", deleteUserProfile });
