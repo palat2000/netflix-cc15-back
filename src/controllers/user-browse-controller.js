@@ -126,9 +126,11 @@ exports.searchBar = async (req, res, next) => {
   try {
     const searchTerm = req.query.q;
     const genre = req.query.genre;
+    const isTVShow = req.query.isTVShow;
 
     console.log(genre);
     console.log(searchTerm);
+    console.log(isTVShow, "isTV na ja");
 
     if (searchTerm) {
       const searchMovieBytitle = await prisma.movie.findMany({
@@ -178,31 +180,65 @@ exports.searchBar = async (req, res, next) => {
         .json({ searchMovieBytitle, searchMovieByGenres, searchByActorName });
     }
 
-    if (genre) {
-      const genres = [
-        "COMEDIES",
-        "ACTION",
-        "HORROR",
-        "SPORTS",
-        "KID",
-        "ROMANCE",
-      ];
+    if (isTVShow === "true") {
+      console.log("true here");
+      // console.log(isTVShow, "isTVshow");
+      if (genre) {
+        const genres = [
+          "COMEDIES",
+          "ACTION",
+          "HORROR",
+          "SPORTS",
+          "KID",
+          "ROMANCE",
+        ];
 
-      const filterArrayGenres = genres.filter((element) => {
-        return element.toLocaleLowerCase().includes(genre);
-      });
-
-      console.log(filterArrayGenres, "here");
-      let searchMovieByGenres = null;
-
-      if (filterArrayGenres.length > 0) {
-        searchMovieByGenres = await prisma.movie.findMany({
-          where: {
-            enumGenres: filterArrayGenres[0],
-          },
+        const filterArrayGenres = genres.filter((element) => {
+          return element.toLocaleLowerCase().includes(genre);
         });
+
+        console.log(filterArrayGenres, "here");
+        let searchMovieByGenres = null;
+
+        if (filterArrayGenres.length > 0) {
+          searchMovieByGenres = await prisma.movie.findMany({
+            where: {
+              enumGenres: filterArrayGenres[0],
+              isTVShow: true,
+            },
+          });
+        }
+        res.status(200).json({ searchMovieByGenres });
       }
-      res.status(200).json({ searchMovieByGenres });
+    } else {
+      console.log("false here");
+      if (genre) {
+        const genres = [
+          "COMEDIES",
+          "ACTION",
+          "HORROR",
+          "SPORTS",
+          "KID",
+          "ROMANCE",
+        ];
+
+        const filterArrayGenres = genres.filter((element) => {
+          return element.toLocaleLowerCase().includes(genre);
+        });
+
+        console.log(filterArrayGenres, "here");
+        let searchMovieByGenres = null;
+
+        if (filterArrayGenres.length > 0) {
+          searchMovieByGenres = await prisma.movie.findMany({
+            where: {
+              enumGenres: filterArrayGenres[0],
+              isTVShow: false,
+            },
+          });
+        }
+        res.status(200).json({ searchMovieByGenres });
+      }
     }
   } catch (err) {
     next(err);
