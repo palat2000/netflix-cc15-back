@@ -4,7 +4,7 @@ const prisma = require("../models/prisma");
 module.exports = async (req, res, next) => {
   try {
     let subscription;
-    if (req.user.subscriptionId) {
+    if (req?.user?.subscriptionId) {
       subscription = await stripe.subscriptions.retrieve(
         req.user.subscriptionId
       );
