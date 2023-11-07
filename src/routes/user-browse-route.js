@@ -24,7 +24,7 @@ router.get(
 );
 
 router.get(
-  "/search",
+  "/search/",
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );

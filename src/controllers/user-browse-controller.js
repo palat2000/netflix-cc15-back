@@ -105,46 +105,85 @@ exports.getMyList = async (req, res, next) => {
 exports.searchBar = async (req, res, next) => {
   try {
     const searchTerm = req.query.q;
+    const genre = req.query.genre;
+
+    console.log(genre);
     console.log(searchTerm);
-    const searchMovieBytitle = await prisma.movie.findMany({
-      where: {
-        title: {
-          contains: searchTerm,
-        },
-      },
-    });
 
-    const genres = ["COMEDIES", "ACTION", "HORROR", "SPORTS", "KID", "ROMANCE"];
-
-    const filterArrayGenres = genres.filter((element) => {
-      return element.toLocaleLowerCase().includes(searchTerm);
-    });
-
-    console.log(filterArrayGenres, "here");
-    let searchMovieByGenres = null;
-
-    if (filterArrayGenres.length > 0) {
-      searchMovieByGenres = await prisma.movie.findMany({
+    if (searchTerm) {
+      const searchMovieBytitle = await prisma.movie.findMany({
         where: {
-          enumGenres: filterArrayGenres[0],
+          title: {
+            contains: searchTerm,
+          },
         },
       });
+
+      const genres = [
+        "COMEDIES",
+        "ACTION",
+        "HORROR",
+        "SPORTS",
+        "KID",
+        "ROMANCE",
+      ];
+
+      const filterArrayGenres = genres.filter((element) => {
+        return element.toLocaleLowerCase().includes(searchTerm);
+      });
+
+      console.log(filterArrayGenres, "here");
+      let searchMovieByGenres = null;
+
+      if (filterArrayGenres.length > 0) {
+        searchMovieByGenres = await prisma.movie.findMany({
+          where: {
+            enumGenres: filterArrayGenres[0],
+          },
+        });
+      }
+
+      const searchByActorName = await prisma.actors.findMany({
+        where: {
+          name: {
+            contains: searchTerm,
+          },
+        },
+        select: {
+          actorMovie: { select: { movie: true } },
+        },
+      });
+      return res
+        .status(200)
+        .json({ searchMovieBytitle, searchMovieByGenres, searchByActorName });
     }
 
-    const searchByActorName = await prisma.actors.findMany({
-      where: {
-        name: {
-          contains: searchTerm,
-        },
-      },
-      include: {
-        movie: true,
-      },
-    });
+    if (genre) {
+      const genres = [
+        "COMEDIES",
+        "ACTION",
+        "HORROR",
+        "SPORTS",
+        "KID",
+        "ROMANCE",
+      ];
 
-    res
-      .status(200)
-      .json({ searchMovieBytitle, searchMovieByGenres, searchByActorName });
+      const filterArrayGenres = genres.filter((element) => {
+        return element.toLocaleLowerCase().includes(genre);
+      });
+
+      console.log(filterArrayGenres, "here");
+      let searchMovieByGenres = null;
+
+      if (filterArrayGenres.length > 0) {
+        searchMovieByGenres = await prisma.movie.findMany({
+          where: {
+            enumGenres: filterArrayGenres[0],
+          },
+        });
+      }
+      res.status(200).json({ searchMovieByGenres });
+    }
   } catch (error) {
     next(error);
   }
