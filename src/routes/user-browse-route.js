@@ -29,6 +29,11 @@ router.get(
   userBrowseController.getMyList
 );
 
+router.get(
+  "/search/",
+  authenticateProfileMiddleware,
+  userBrowseController.searchBar
+);
 router.patch(
   "/Like",
   authenticateProfileMiddleware,

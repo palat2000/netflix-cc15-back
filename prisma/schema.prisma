@@ -22,7 +22,6 @@ model User {
   mobile         String?          @unique
   activeAt       DateTime?
   expiredDate    DateTime?
-  customerId     String?
   subscriptionId String?
   paymentHistory PaymentHistory[]
   userAccount    UserProfile[]
@@ -49,17 +48,17 @@ model UserProfile {
 }
 
 model History {
-  id            Int          @id @default(autoincrement())
-  Movie         Movie?       @relation(fields: [movieId], references: [id])
-  movieId       Int?
-  enumGenres    GenresSelect
-  userProfileId Int
-  userProfile   UserProfile  @relation(fields: [userProfileId], references: [id])
+  id             Int         @id @default(autoincrement())
+  userProfile    UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId  Int
+  video          Video?      @relation(fields: [videoId], references: [id])
+  videoId        Int?
+  recentWatching String?
 }
 
 model MyList {
   id            Int          @id @default(autoincrement())
-  UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
   userProfileId Int?
   movieId       Int
   movie         Movie        @relation(fields: [movieId], references: [id])
@@ -77,25 +76,33 @@ model Movie {
   trailer        String?
   enumGenres     GenresSelect? @default(ACTION)
   myList         MyList[]
-  history        History[]
-  actors         Actors[]
-  video          Video[]
+
+  video      Video[]
+  actorMovie ActorMovie[]
 }
 
 model Actors {
-  id      Int    @id @default(autoincrement())
-  name    String
-  Movie   Movie? @relation(fields: [movieId], references: [id])
-  movieId Int?
+  id         Int          @id @default(autoincrement())
+  name       String
+  actorMovie ActorMovie[]
+}
+
+model ActorMovie {
+  id       Int     @id @default(autoincrement())
+  actors   Actors? @relation(fields: [actorsId], references: [id])
+  actorsId Int?
+  movie    Movie?  @relation(fields: [movieId], references: [id])
+  movieId  Int?
 }
 
 model Video {
-  id               Int    @id @default(autoincrement())
-  videoEpisodeNo   Int    @default(1)
+  id               Int       @id @default(autoincrement())
+  videoEpisodeNo   Int       @default(1)
   videoEpisodeName String
   videoUrl         String
-  Movie            Movie? @relation(fields: [movieId], references: [id])
+  movie            Movie?    @relation(fields: [movieId], references: [id])
   movieId          Int?
+  history          History[]
 }
 
 model Admin {
