@@ -39,13 +39,9 @@ exports.register = async (req, res, next) => {
     if (error) {
       return next(error);
     }
-
-    let { email } = value.email;
-    console.log(email);
-    let emailLower = email.toLowerCase();
     const emailDup = await prisma.user.findUnique({
       where: {
-        email: emailLower,
+        email: value.email,
       },
     });
     if (emailDup) {
