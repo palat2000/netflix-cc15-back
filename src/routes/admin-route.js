@@ -14,6 +14,8 @@ const upload = require("../middlewares/upload");
 //   adminController.createMovie
 // );
 
+router.post("/", adminController.createMovie);
+
 // router.post(
 //   "/",
 //   authenticateMiddleware,
@@ -21,6 +23,6 @@ const upload = require("../middlewares/upload");
 //   adminController.createMovie
 // );
 
-router.post("/",authenticateMiddleware)
+router.post("/", authenticateMiddleware);
 
 module.exports = router;
