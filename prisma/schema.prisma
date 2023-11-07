@@ -58,7 +58,7 @@ model History {
 
 model MyList {
   id            Int          @id @default(autoincrement())
-  UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
   userProfileId Int?
   movieId       Int
   movie         Movie        @relation(fields: [movieId], references: [id])
@@ -93,7 +93,7 @@ model Video {
   videoEpisodeNo   Int       @default(1)
   videoEpisodeName String
   videoUrl         String
-  Movie            Movie?    @relation(fields: [movieId], references: [id])
+  movie            Movie?    @relation(fields: [movieId], references: [id])
   movieId          Int?
   history          History[]
 }
