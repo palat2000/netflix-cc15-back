@@ -47,10 +47,10 @@ exports.subscription = async (req, res, next) => {
     );
     await prisma.user.update({
       data: {
-        customerID: subscription.customer,
+        customerId: subscription.customer,
         subscriptionId: subscription.id,
         isActive: true,
-        expiredDate: subscription.current_period_end,
+        expiredDate: new Date(subscription.current_period_end * 1000),
       },
       where: {
         id: req.user.id,

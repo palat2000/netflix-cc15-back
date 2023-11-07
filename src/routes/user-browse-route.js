@@ -7,7 +7,7 @@ const authenticateProfileMiddleware = require("../middlewares/authenticateProfil
 
 router.get(
   "/movie/:movieId",
-  authenticateMiddleware,
+  profileAuthenticate,
   userBrowseController.getMovieById
 );
 router.get(
