@@ -101,26 +101,19 @@ exports.addMovie = async (req, res, next) => {
     const sheetNames = file.SheetNames;
     const worksheet = file.Sheets[sheetNames[0]];
     const data = XLSX.utils.sheet_to_json(worksheet);
-
     const moviesMap = new Map();
-
+    const movieObj = {};
     data.forEach((row) => {
       const title = row.title;
       const existingMovie = moviesMap.get(title);
-
-      console.log(existingMovie);
-
       if (existingMovie) {
-        // Movie already exists in the map; add the video information.
         existingMovie.video.push({
           videoEpisodeName: row.videoEpisodeName,
           videoEpisodeNo: row.videoEpisodeNo,
           video: row.video,
         });
       } else {
-        // Movie doesn't exist in the map; create a new movie object.
         const actorName = row.actorName.split(",").map((name) => name.trim());
-
         const movie = {
           title: title,
           isTVShow: row.isTVShow === "true",
@@ -138,13 +131,10 @@ exports.addMovie = async (req, res, next) => {
             },
           ],
         };
-
         moviesMap.set(title, movie);
       }
     });
-
     const formattedData = [...moviesMap.values()];
-
     res.json({ formattedData });
   } catch (err) {
     next(err);
