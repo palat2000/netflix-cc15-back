@@ -70,9 +70,8 @@ exports.deleteUserProfile = async (req, res, next) => {
 
 exports.editUserProfile = async (req, res, next) => {
   try {
-    // console.log(req.body, "req.body");
-
-    const { userProfileName, userProfileId, userId } = req.body;
+    console.log(req.body, "req.body");
+    const { userProfileName } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
     }
@@ -110,6 +109,7 @@ exports.editUserProfile = async (req, res, next) => {
           : [],
       },
     });
+    
     if (dupUserProfileNameWithUserId.length > 0) {
       return next(createError("This userProfileName is already use", 400));
     }

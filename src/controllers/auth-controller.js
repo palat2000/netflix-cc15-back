@@ -140,7 +140,6 @@ exports.getMe = async (req, res) => {
 
 exports.chooseProfile = async (req, res, next) => {
   try {
-    console.log(req.body, "req body");
     const payload = { userProfileId: req.body.id };
     const accessToken = jwt.sign(
       payload,
@@ -157,6 +156,8 @@ exports.chooseProfile = async (req, res, next) => {
     });
 
     res.status(200).json({ accessToken, userProfile });
+    console.log("accessToken",accessToken)
+    console.log("userProfile",userProfile)
   } catch (error) {
     next(error);
   }

@@ -20,7 +20,7 @@ router.delete(
 router.patch(
   "/profile",
   upload.single("profileImageUrl"),
-  authenticateProfileMiddleware,
+  authenticateMiddleware,
   userController.editUserProfile
 );
 
