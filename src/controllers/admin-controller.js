@@ -4,6 +4,7 @@ const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 const readXLSXFile = require("../services/read-xlsx-file");
+const insertMovie = require("../services/insert-movie");
 
 exports.createMovie = async (req, res, next) => {
   console.log("req.body", req.body);
@@ -103,10 +104,14 @@ exports.addMovie = async (req, res, next) => {
     const worksheet = file.Sheets[sheetNames[0]];
     const data = XLSX.utils.sheet_to_json(worksheet);
     const formattedData = readXLSXFile(data);
-
-    res.json({ formattedData });
+    const movies = await insertMovie(formattedData);
+    res.json({ movies });
   } catch (err) {
     next(err);
+  } finally {
+    if (req.file) {
+      fs.unlink(req.file.path);
+    }
   }
 };
 

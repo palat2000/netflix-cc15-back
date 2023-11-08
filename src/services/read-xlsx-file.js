@@ -5,9 +5,9 @@ function readXLSXFile(arrMovie) {
     const existingMovie = title in movieObj;
     if (existingMovie) {
       movieObj[title].video.push({
-        videoEpisodeName: row.videoEpisodeName,
+        videoEpisodeName: "" + row.videoEpisodeName,
         videoEpisodeNo: row.videoEpisodeNo,
-        video: row.video,
+        videoUrl: row.videoUrl,
       });
     } else {
       const actorName = row.actorName.split(",").map((name) => name.trim());
@@ -22,9 +22,9 @@ function readXLSXFile(arrMovie) {
         actorName,
         video: [
           {
-            videoEpisodeName: row.videoEpisodeName,
+            videoEpisodeName: "" + row.videoEpisodeName,
             videoEpisodeNo: row.videoEpisodeNo,
-            video: row.video,
+            videoUrl: row.videoUrl,
           },
         ],
       };
