@@ -46,4 +46,10 @@ router.patch(
   userBrowseController.unLike
 );
 
+router.get(
+  "/startWatching/:videoId",
+  authenticateProfileMiddleware,
+  userBrowseController.startWatching
+);
+
 module.exports = router;

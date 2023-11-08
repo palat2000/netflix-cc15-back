@@ -20,6 +20,7 @@ model User {
   birthDate      Int?
   isActive       Boolean          @default(false)
   mobile         String?          @unique
+  customerId     String?
   activeAt       DateTime?
   expiredDate    DateTime?
   subscriptionId String?

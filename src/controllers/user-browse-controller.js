@@ -302,9 +302,32 @@ exports.unLike = async (req, res, next) => {
   }
 };
 
-exports.watching = async (req, res, next) => {
+exports.startWatching = async (req, res, next) => {
   try {
-    const { videoId } = req.body;
+    const { videoId } = +req.params.videoId;
+    console.log(videoId, "videoId here");
+
+    // const findHistory = await prisma.history.findFirst({
+    //   where: {
+    //     videoId: videoId,
+    //   },
+    //   select: {
+    //     recentWatching: true,
+    //   },
+    // });
+
+    // if (findHistory) {
+    //   res.status(200).json({ findHistory });
+    // }
+
+    // const createHistory = await prisma.history.create({
+    //   data: {
+    //     userProfileId: +req.userProfile.id,
+    //     videoId: +videoId,
+    //   },
+    // });
+
+    // res.status(200).json({ createHistory });
   } catch (error) {
     next(error);
   }
