@@ -174,3 +174,11 @@ exports.unLike = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.watching = async (req, res, next) => {
+  try {
+    const { videoId } = req.body;
+  } catch (error) {
+    next(error);
+  }
+};
