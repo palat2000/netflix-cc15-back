@@ -4,6 +4,7 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 
 exports.createUserProfile = async (req, res, next) => {
+  // console.log("req.body", req.body);
   console.log("createeeee hereeee")
   try {
     const { userProfileName, isKid, userId } = req.body;
@@ -18,8 +19,11 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-    if (isKid === "true") favoriteGenres = "KID";
+    // console.log(userProfileNameDup);
+    if (isKid) favoriteGenres = "KID";
 
+    if (isKid === "true") favoriteGenres = "KID";
+    console.log(favoriteGenres);
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,
@@ -50,9 +54,8 @@ exports.createUserProfile = async (req, res, next) => {
 
 exports.deleteUserProfile = async (req, res, next) => {
   try {
-    console.log("delete")
-    const { profileId } = req.params;
 
+    const { profileId } = req.params;
 
     const deleteUserProfile = await prisma.userProfile.delete({
       where: {
@@ -65,30 +68,11 @@ exports.deleteUserProfile = async (req, res, next) => {
   }
 };
 
-// exports.getProfile = async (req, res, next) => {
-//   console.log(req.body, "body");
-//   try {
-//     const { userProfileId } = req.body;
-//     const userProfile = await prisma.userProfile.findFirst({
-//       where: {
-//         id: userProfileId,
-//       },
-//     });
-//     res.status(200).json({ userProfile });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 exports.editUserProfile = async (req, res, next) => {
   try {
     // console.log(req.body, "req.body");
 
-    
     const { userProfileName, userProfileId, userId } = req.body;
-    console.log("userProfileName",userProfileName)
-    console.log('userProfileId', userProfileId)
-    console.log('userId', userId)
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
     }
@@ -101,7 +85,10 @@ exports.editUserProfile = async (req, res, next) => {
     const dupUserProfileNameWithUserProfileId =
       await prisma.userProfile.findFirst({
         where: {
-          AND: [{ id: +userProfileId }, { userProfileName: userProfileName }],
+          AND: [
+            { id: +req.userProfile.id },
+            { userProfileName: userProfileName },
+          ],
         },
       });
 
@@ -110,7 +97,10 @@ exports.editUserProfile = async (req, res, next) => {
     }
     const dupUserProfileNameWithUserId = await prisma.userProfile.findMany({
       where: {
-        AND: [{ userId: req.user.id }, { userProfileName: userProfileName }],
+        AND: [
+          { userId: +req.userProfile.userId },
+          { userProfileName: userProfileName },
+        ],
         NOT: dupUserProfileNameWithUserProfileId
           ? [
               {
@@ -128,14 +118,14 @@ exports.editUserProfile = async (req, res, next) => {
       body.profileImageUrl = imageUrl;
     }
 
-    const newUserProfileName = await prisma.userProfile.update({
+    const userProfile = await prisma.userProfile.update({
       where: {
-        id: +userProfileId,
+        id: +req.userProfile.id,
       },
       data: body,
     });
 
-    res.status(200).json({ message: "userProfile edited", newUserProfileName });
+    res.status(200).json({ userProfile });
   } catch (error) {
     next(error);
   } finally {

@@ -1,14 +1,28 @@
 const express = require("express");
-const userController = require("../controllers/user-controller");
+const adminController = require("../controllers/admin-controller");
 const router = express.Router();
 const authenticateMiddleware = require("../middlewares/authenticate");
 const upload = require("../middlewares/upload");
 
-router.post(
-  "/movie",
-  upload.single("image"),
-  authenticateMiddleware,
-  userController.editUserProfile
-);
+// router.post(
+//   "/",
+//   authenticateMiddleware,
+//   upload.fields([
+//     { name: "image", maxCount: 1 },
+//     { name: "trailer", maxCount: 1 },
+//   ]),
+//   adminController.createMovie
+// );
+
+router.post("/", adminController.quickAdd);
+
+// router.post(
+//   "/",
+//   authenticateMiddleware,
+//   upload.array("file"),
+//   adminController.createMovie
+// );
+
+router.post("/", authenticateMiddleware);
 
 module.exports = router;

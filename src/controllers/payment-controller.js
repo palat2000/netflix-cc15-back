@@ -47,12 +47,20 @@ exports.subscription = async (req, res, next) => {
     );
     await prisma.user.update({
       data: {
-        customerID: subscription.customer,
+        customerId: subscription.customer,
         subscriptionId: subscription.id,
         isActive: true,
+        expiredDate: new Date(subscription.current_period_end * 1000),
       },
       where: {
         id: req.user.id,
+      },
+    });
+    await prisma.paymentHistory.create({
+      data: {
+        paymentDate: new Date(),
+        transaction: session.id,
+        userId: req.user.id,
       },
     });
     res.status(200).json({ message: "OK" });
