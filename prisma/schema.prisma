@@ -24,6 +24,7 @@ model User {
   activeAt       DateTime?
   expiredDate    DateTime?
   subscriptionId String?
+  customerId     String?
   paymentHistory PaymentHistory[]
   userAccount    UserProfile[]
 }
