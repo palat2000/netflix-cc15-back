@@ -103,19 +103,24 @@ exports.login = async (req, res, next) => {
     });
 
     delete user.password;
-    res.status(200).json({ accessToken, user, allUserProfile });
+    res.status(200).json({ accessToken, user: {...req.user,allUserProfile} });
   } catch (error) {
     next(error);
   }
 };
 
 exports.getMe = async (req, res) => {
+  try {
   const allUserProfile = await prisma.userProfile.findMany({
     where: {
       userId: req.user.id,
     },
   });
+  // console.log(allUserProfile)
   res.status(200).json({ user: {...req.user,allUserProfile} });
+} catch(err) {
+  console.log(err)
+}
 };
 
 exports.chooseProfile = async (req, res, next) => {

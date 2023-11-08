@@ -7,6 +7,7 @@ exports.createUserProfile = async (req, res, next) => {
   console.log("createeeee hereeee")
   try {
     const { userProfileName, isKid, userId } = req.body;
+    console.log("isKid",isKid)
     const userProfileNameDup = await prisma.userProfile.findFirst({
       where: {
         userId: +userId,
@@ -17,13 +18,14 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-    if (isKid) favoriteGenres = "KID";
+    if (isKid === "true") favoriteGenres = "KID";
 
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,
       profileImageUrl: null,
       userId: +userId,
+  
     };
 
     if (req?.file?.path) {
