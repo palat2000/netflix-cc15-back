@@ -18,8 +18,9 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-    // console.log(userProfileNameDup);
-    if (isKid) favoriteGenres = "KID";
+
+    if (isKid === "true") favoriteGenres = "KID";
+    console.log(favoriteGenres);
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,

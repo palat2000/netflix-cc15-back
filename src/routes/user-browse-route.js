@@ -7,7 +7,7 @@ const authenticateProfileMiddleware = require("../middlewares/authenticateProfil
 
 router.get(
   "/movie/:movieId",
-  authenticateProfileMiddleware,
+  profileAuthenticate,
   userBrowseController.getMovieById
 );
 router.get(
@@ -29,6 +29,11 @@ router.get(
   userBrowseController.getMyList
 );
 
+router.get(
+  "/search/",
+  authenticateProfileMiddleware,
+  userBrowseController.searchBar
+);
 router.patch(
   "/Like",
   authenticateProfileMiddleware,
