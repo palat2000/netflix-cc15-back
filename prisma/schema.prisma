@@ -11,20 +11,20 @@ datasource db {
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   firstName      String?
   lastName       String?
-  email          String           @unique
+  email          String    @unique
   password       String
   birthMonth     Int?
   birthDate      Int?
-  isActive       Boolean          @default(false)
-  mobile         String?          @unique
+  isActive       Boolean   @default(false)
+  mobile         String?   @unique
   customerId     String?
   activeAt       DateTime?
   expiredDate    DateTime?
   subscriptionId String?
-  customerId     String?
+
   paymentHistory PaymentHistory[]
   userAccount    UserProfile[]
 }
