@@ -1,14 +1,25 @@
 const prisma = require("../models/prisma");
 const shuffleArray = require("./shuffle-array");
 
-async function getMovie(profileId, genre) {
-  const data = { fevGenre: [], history: [], top10: [] };
+async function getMovie(profileId, genre, isTVShow) {
+  const data = {
+    top10: [],
+    newReleases: [],
+    continueWatching: [],
+    action: [],
+    romantic: [],
+    comedy: [],
+    horror: [],
+    dramas: [],
+    kids: [],
+  };
+
   const historyWatchMovie = await prisma.history.findMany({
     where: {
       userProfileId: profileId,
     },
   });
-  const top10Movie = await prisma.movie.findMany({
+  const top10 = await prisma.movie.findMany({
     orderBy: {
       count_watching: "desc",
     },
@@ -29,7 +40,7 @@ async function getMovie(profileId, genre) {
     data.history.push(historyWatchMovie.pop());
   }
 
-  data.top10 = [...top10Movie];
+  data.top10 = top10;
 
   return data;
 }
