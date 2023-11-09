@@ -125,6 +125,10 @@ exports.prepareFile = async (req, res, next) => {
     res.status(200).json({ formattedData });
   } catch (err) {
     next(err);
+  } finally {
+    if (req.file) {
+      fs.unlink(req.file.path);
+    }
   }
 };
 
