@@ -11,18 +11,20 @@ datasource db {
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   firstName      String?
   lastName       String?
-  email          String           @unique
+  email          String    @unique
   password       String
   birthMonth     Int?
   birthDate      Int?
-  isActive       Boolean          @default(false)
-  mobile         String?          @unique
+  isActive       Boolean   @default(false)
+  mobile         String?   @unique
+  customerId     String?
   activeAt       DateTime?
   expiredDate    DateTime?
   subscriptionId String?
+
   paymentHistory PaymentHistory[]
   userAccount    UserProfile[]
 }
@@ -45,15 +47,17 @@ model UserProfile {
   userId          Int
   myList          MyList[]
   history         History[]
+  likeMovie       LikeMovie[]
 }
 
 model History {
-  id             Int         @id @default(autoincrement())
-  userProfile    UserProfile @relation(fields: [userProfileId], references: [id])
-  userProfileId  Int
-  video          Video?      @relation(fields: [videoId], references: [id])
-  videoId        Int?
-  recentWatching String?
+  id               Int         @id @default(autoincrement())
+  userProfile      UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId    Int
+  video            Video?      @relation(fields: [videoId], references: [id])
+  videoId          Int?
+  recentWatching   String?
+  latestWatchingAt DateTime?
 }
 
 model MyList {
@@ -65,20 +69,29 @@ model MyList {
 }
 
 model Movie {
-  id             Int           @id @default(autoincrement())
-  title          String
-  release_year   String        @db.VarChar(7)
-  count_watching Int?
-  count_liked    Int?
-  detail         String?
-  isTVShow       Boolean       @default(false)
-  image          String?
-  trailer        String?
-  enumGenres     GenresSelect? @default(ACTION)
-  myList         MyList[]
+  id                    Int          @id @default(autoincrement())
+  title                 String
+  release_year          String       @db.VarChar(7)
+  count_watching        Int?
+  count_liked           Int?
+  detail                String?
+  isTVShow              Boolean      @default(false)
+  image                 String?
+  trailer               String?
+  enumGenres            GenresSelect @default(ACTION)
+  releaseDateForNetflix DateTime?
+  myList                MyList[]
+  video                 Video[]
+  actorMovie            ActorMovie[]
+  likeMovie             LikeMovie[]
+}
 
-  video      Video[]
-  actorMovie ActorMovie[]
+model LikeMovie {
+  id            Int          @id @default(autoincrement())
+  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfileId Int?
+  movie         Movie?       @relation(fields: [movieId], references: [id])
+  movieId       Int?
 }
 
 model Actors {

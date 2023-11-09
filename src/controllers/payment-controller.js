@@ -18,7 +18,7 @@ exports.payment = async (req, res, next) => {
         },
       ],
       mode: "subscription",
-      success_url: `${URL}/browse?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${URL}/success?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${URL}/package?canceled=true`,
     });
     res.json({ url: session.url });
