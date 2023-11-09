@@ -13,34 +13,31 @@ async function getMovie(profileId, genre, isTVShow) {
     dramas: [],
     kids: [],
   };
-
-  const historyWatchMovie = await prisma.history.findMany({
-    where: {
-      userProfileId: profileId,
-    },
-  });
-  const top10 = await prisma.movie.findMany({
-    orderBy: {
-      count_watching: "desc",
-    },
-    take: 10,
-    skip: 0,
-  });
-  const recommendFevGenreMovie = await prisma.movie.findMany({
-    where: {
-      enumGenres: genre,
-    },
-  });
-  shuffleArray(historyWatchMovie);
-  shuffleArray(recommendFevGenreMovie);
-  for (let i = 0; i < 10; i++) {
-    data.fevGenre.push(recommendFevGenreMovie.pop());
+  if (isTVShow === undefined) {
+    const continueWatching = await prisma.history.findMany({
+      where: {
+        userProfileId: profileId,
+      },
+      include: {
+        video: {
+          include: {
+            movie: true,
+          },
+        },
+      },
+      take: 10,
+      skip: 0,
+    });
+    const top10 = await prisma.movie.findMany({
+      orderBy: {
+        count_watching: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    data.continueWatching = continueWatching;
+    data.top10 = top10;
   }
-  for (let i = 0; i < 10; i++) {
-    data.history.push(historyWatchMovie.pop());
-  }
-
-  data.top10 = top10;
 
   return data;
 }
