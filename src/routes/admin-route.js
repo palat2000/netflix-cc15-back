@@ -11,4 +11,10 @@ router.post(
   adminController.addMovie
 );
 
+router.post(
+  "/prepare-file", // authenticateMiddleware,
+  upload.single("file"),
+  adminController.prepareFile
+);
+
 module.exports = router;
