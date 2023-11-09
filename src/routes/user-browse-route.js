@@ -8,7 +8,8 @@ const authenticateMiddleware = require("../middlewares/authenticate");
 
 router.get(
   "/movie/:movieId",
-  profileAuthenticate,
+  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userBrowseController.getMovieById
 );
 router.get(
@@ -38,14 +39,9 @@ router.get(
 );
 router.patch(
   "/Like",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
-  userBrowseController.addLike
-);
-
-router.patch(
-  "/unlike",
-  authenticateProfileMiddleware,
-  userBrowseController.unLike
+  userBrowseController.editLike
 );
 
 router.get(
