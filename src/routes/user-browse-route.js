@@ -32,6 +32,7 @@ router.get(
 
 router.get(
   "/search/",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
