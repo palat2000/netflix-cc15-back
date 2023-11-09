@@ -67,16 +67,16 @@ model MyList {
 }
 
 model Movie {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   title          String
-  release_year   String        @db.VarChar(7)
+  release_year   String       @db.VarChar(7)
   count_watching Int?
   count_liked    Int?
   detail         String?
-  isTVShow       Boolean       @default(false)
+  isTVShow       Boolean      @default(false)
   image          String?
   trailer        String?
-  enumGenres     GenresSelect? @default(ACTION)
+  enumGenres     GenresSelect @default(ACTION)
   myList         MyList[]
 
   video      Video[]
