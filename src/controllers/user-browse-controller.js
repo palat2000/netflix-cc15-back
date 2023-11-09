@@ -8,7 +8,7 @@ exports.getMovie = async (req, res, next) => {
     // if (req.profile.isKid) {
     // movies = await getMovieKids(6);
     // } else {
-    movies = await getMovie();
+    movies = await getMovie(20, "ACTION");
     // }
     res.status(200).json({ movies });
   } catch (err) {
