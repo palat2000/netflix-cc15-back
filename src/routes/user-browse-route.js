@@ -4,6 +4,7 @@ const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
 const checkSubscriptionStatusMiddleware = require("../middlewares/check-subscription-status");
 const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
+const authenticateMiddleware = require("../middlewares/authenticate");
 
 router.get(
   "/movie/:movieId",
@@ -31,6 +32,7 @@ router.get(
 
 router.get(
   "/search/",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
@@ -44,6 +46,19 @@ router.patch(
   "/unlike",
   authenticateProfileMiddleware,
   userBrowseController.unLike
+);
+
+router.get(
+  "/startWatching/:videoId",
+  authenticateMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.startWatching
+);
+router.post(
+  "/endWatching",
+  authenticateMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.endWatching
 );
 
 module.exports = router;

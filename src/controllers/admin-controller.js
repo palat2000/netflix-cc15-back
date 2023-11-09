@@ -2,6 +2,18 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
+// const {
+//   registerSchema,
+//   loginSchema,
+// } = require("../validators/admin-validator");
+
+exports.login = async (req, res, next) => {
+  // try {
+  //   const { value, error } = loginSchema.validate;
+  // } catch (error) {
+  //   next(error);
+  // }
+};
 
 exports.createMovie = async (req, res, next) => {
   console.log("req.body", req.body);
