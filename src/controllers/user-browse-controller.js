@@ -424,6 +424,7 @@ exports.endWatching = async (req, res, next) => {
       },
       data: {
         recentWatching: recentWatching,
+        latestWatchingAt: new Date(),
       },
     });
 

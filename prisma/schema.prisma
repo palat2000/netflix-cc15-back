@@ -57,7 +57,7 @@ model History {
   video            Video?      @relation(fields: [videoId], references: [id])
   videoId          Int?
   recentWatching   String?
-  latestWatchingAt String?
+  latestWatchingAt DateTime?
 }
 
 model MyList {
