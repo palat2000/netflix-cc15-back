@@ -7,6 +7,8 @@ const upload = require("../middlewares/upload");
 router.post("/login", adminController.login);
 router.post("/reqister", adminController.register);
 
+router.get("/me", authenticateMiddleware, adminController.getMe);
+
 router.post(
   "/",
   // authenticateMiddleware,
