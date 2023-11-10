@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
-const checkSubscriptionStatusMiddleware = require("../middlewares/check-subscription-status");
 const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
 const authenticateMiddleware = require("../middlewares/authenticate");
 
@@ -14,19 +12,21 @@ router.get(
 );
 router.get(
   "/",
-  // checkSubscriptionStatusMiddleware,
-  // profileAuthenticate,
+  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userBrowseController.getMovie
 );
 
 router.post(
   "/mylist",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.editMyList
 );
 
 router.get(
   "/mylist",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.getMyList
 );

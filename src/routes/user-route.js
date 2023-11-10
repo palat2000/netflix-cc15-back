@@ -2,7 +2,6 @@ const express = require("express");
 const userController = require("../controllers/user-controller");
 const router = express.Router();
 const authenticateMiddleware = require("../middlewares/authenticate");
-const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
 const upload = require("../middlewares/upload");
 
 router.post(
