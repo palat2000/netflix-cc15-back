@@ -50,6 +50,13 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
+    const likeHistory = await prisma.likeMovie.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: movieId,
+      },
+    });
+
     const enumGenres = await prisma.movie.findFirst({
       where: {
         id: movieId,
@@ -66,7 +73,7 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
-    res.status(200).json({ movie, moreLikeThis });
+    res.status(200).json({ movie: { ...movie, likeHistory }, moreLikeThis });
   } catch (err) {
     next(err);
   }
@@ -254,8 +261,16 @@ exports.searchBar = async (req, res, next) => {
     next(err);
   }
 };
-exports.addLike = async (req, res, next) => {
+exports.editLike = async (req, res, next) => {
   try {
+    const checkUserProfileLike = await prisma.likeMovie.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: +req.body.movieId,
+      },
+    });
+    console.log(checkUserProfileLike, "checkUserProfileLike ");
+
     const countLike = await prisma.movie.findFirst({
       where: {
         id: +req.body.movieId,
@@ -266,43 +281,43 @@ exports.addLike = async (req, res, next) => {
     });
     console.log(countLike);
 
-    const like = await prisma.movie.update({
-      where: {
-        id: +req.body.movieId,
-      },
-      data: {
-        count_liked: countLike.count_liked + 1,
-      },
-    });
+    let likeMovieHistory;
+    let editLike;
 
-    res.status(201).json({ like });
-  } catch (error) {
-    next(error);
-  }
-};
+    if (!checkUserProfileLike) {
+      likeMovieHistory = await prisma.likeMovie.create({
+        data: {
+          userProfileId: +req.userProfile.id,
+          movieId: +req.body.movieId,
+        },
+      });
 
-exports.unLike = async (req, res, next) => {
-  try {
-    const countLike = await prisma.movie.findFirst({
-      where: {
-        id: +req.body.movieId,
-      },
-      select: {
-        count_liked: true,
-      },
-    });
-    console.log(countLike);
+      editLike = await prisma.movie.update({
+        where: {
+          id: +req.body.movieId,
+        },
+        data: {
+          count_liked: countLike.count_liked + 1,
+        },
+      });
+    } else {
+      likeMovieHistory = await prisma.likeMovie.delete({
+        where: {
+          id: +checkUserProfileLike.id,
+        },
+      });
+      editLike = await prisma.movie.update({
+        where: {
+          id: +req.body.movieId,
+        },
+        data: {
+          count_liked: countLike.count_liked - 1,
+        },
+      });
+      console.log("kaow ja");
+    }
 
-    const like = await prisma.movie.update({
-      where: {
-        id: +req.body.movieId,
-      },
-      data: {
-        count_liked: countLike.count_liked - 1,
-      },
-    });
-
-    res.status(201).json({ like });
+    res.status(201).json({ likeMovieHistory, editLike });
   } catch (error) {
     next(error);
   }
