@@ -4,13 +4,18 @@ const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {
+    const isTVShow = req.query.isTVShow;
     let movies;
     // if (req.profile.isKid) {
-    movies = await getMovieKids();
+    // movies = await getMovieKids(6);
     // } else {
-    //   movies = await getMovie(req.profile.id, req.profile.enumGenres);
+    //   if (isTVShow === undefined) {
+    // movies = await getMovie(20);
+    //   } else {
+    const isTVShowBoolean = Boolean(+isTVShow);
+    movies = await getMovie(14, isTVShowBoolean);
+    //   }
     // }
-
     res.status(200).json({ movies });
   } catch (err) {
     next(err);
@@ -45,6 +50,13 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
+    const likeHistory = await prisma.likeMovie.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: movieId,
+      },
+    });
+
     const enumGenres = await prisma.movie.findFirst({
       where: {
         id: movieId,
@@ -61,7 +73,7 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
-    res.status(200).json({ movie, moreLikeThis });
+    res.status(200).json({ movie: { ...movie, likeHistory }, moreLikeThis });
   } catch (err) {
     next(err);
   }
@@ -249,8 +261,16 @@ exports.searchBar = async (req, res, next) => {
     next(err);
   }
 };
-exports.addLike = async (req, res, next) => {
+exports.editLike = async (req, res, next) => {
   try {
+    const checkUserProfileLike = await prisma.likeMovie.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: +req.body.movieId,
+      },
+    });
+    console.log(checkUserProfileLike, "checkUserProfileLike ");
+
     const countLike = await prisma.movie.findFirst({
       where: {
         id: +req.body.movieId,
@@ -261,43 +281,43 @@ exports.addLike = async (req, res, next) => {
     });
     console.log(countLike);
 
-    const like = await prisma.movie.update({
-      where: {
-        id: +req.body.movieId,
-      },
-      data: {
-        count_liked: countLike.count_liked + 1,
-      },
-    });
+    let likeMovieHistory;
+    let editLike;
 
-    res.status(201).json({ like });
-  } catch (error) {
-    next(error);
-  }
-};
+    if (!checkUserProfileLike) {
+      likeMovieHistory = await prisma.likeMovie.create({
+        data: {
+          userProfileId: +req.userProfile.id,
+          movieId: +req.body.movieId,
+        },
+      });
 
-exports.unLike = async (req, res, next) => {
-  try {
-    const countLike = await prisma.movie.findFirst({
-      where: {
-        id: +req.body.movieId,
-      },
-      select: {
-        count_liked: true,
-      },
-    });
-    console.log(countLike);
+      editLike = await prisma.movie.update({
+        where: {
+          id: +req.body.movieId,
+        },
+        data: {
+          count_liked: countLike.count_liked + 1,
+        },
+      });
+    } else {
+      likeMovieHistory = await prisma.likeMovie.delete({
+        where: {
+          id: +checkUserProfileLike.id,
+        },
+      });
+      editLike = await prisma.movie.update({
+        where: {
+          id: +req.body.movieId,
+        },
+        data: {
+          count_liked: countLike.count_liked - 1,
+        },
+      });
+      console.log("kaow ja");
+    }
 
-    const like = await prisma.movie.update({
-      where: {
-        id: +req.body.movieId,
-      },
-      data: {
-        count_liked: countLike.count_liked - 1,
-      },
-    });
-
-    res.status(201).json({ like });
+    res.status(201).json({ likeMovieHistory, editLike });
   } catch (error) {
     next(error);
   }
@@ -308,7 +328,86 @@ exports.startWatching = async (req, res, next) => {
     const { videoId } = req.params;
     console.log(videoId, "videoId here");
 
-    const foundHistory = await prisma.history.findFirst({
+    const findHistory = await prisma.history.findFirst({
+      where: {
+        videoId: +videoId,
+        userProfileId: +req.userProfile.id,
+      },
+    });
+
+    if (!findHistory) {
+      const createHistory = await prisma.history.create({
+        data: {
+          userProfileId: +req.userProfile.id,
+          videoId: +videoId,
+        },
+      });
+      console.log("create jaa", createHistory.videoId, "eiei", videoId);
+      await prisma.video.update({
+        where: {
+          id: +videoId,
+        },
+        data: {
+          movie: {
+            update: {
+              count_watching: {
+                increment: +1,
+              },
+            },
+          },
+        },
+      });
+
+      const sqlQuery = `
+      SELECT mv.enumGenres, COUNT(*) AS genreCount
+      FROM History hs
+      JOIN Video vd ON hs.videoId = vd.id
+      JOIN Movie mv ON vd.movieId = mv.id
+      WHERE hs.userProfileId = ${+req.userProfile.id}
+      GROUP BY mv.enumGenres
+      ORDER BY genreCount DESC
+      LIMIT 1;
+    `;
+
+      const result = await prisma.$queryRaw`
+      SELECT mv.enumGenres, COUNT(*) AS genreCount
+      FROM History hs
+      JOIN Video vd ON hs.videoId = vd.id
+      JOIN Movie mv ON vd.movieId = mv.id
+      WHERE hs.userProfileId = ${+req.userProfile.id}
+      GROUP BY mv.enumGenres
+      ORDER BY genreCount DESC
+      LIMIT 1;
+    `;
+      console.log("RESULT", result[0].genreCount);
+      console.log("Category", result[0]);
+
+      const editFavoriteGenres = await prisma.userProfile.update({
+        where: {
+          id: +req.userProfile.id,
+        },
+        data: {
+          favoriteGenres: result[0].enumGenres,
+        },
+      });
+      // const mostFavoriteGenres = await prisma.history.groupBy({
+      //   where: {
+      //     userProfileId: +req.userProfile.id,
+      //   },
+      //   select: {
+      //     video: {
+      //       select: {
+      //         movie: true,
+      //       },
+      //     },
+      //   },
+      // });
+      // console.log(mostFavoriteGenres);
+
+      return res.status(200).json({ createHistory, editFavoriteGenres });
+    }
+
+    const recentWatching = await prisma.history.findFirst({
       where: {
         videoId: +videoId,
         userProfileId: +req.userProfile.id,
@@ -317,34 +416,9 @@ exports.startWatching = async (req, res, next) => {
         recentWatching: true,
       },
     });
+    console.log(recentWatching, " FOUND HISTORY");
 
-    if (!foundHistory) {
-      const createHistory = await prisma.history.create({
-        data: {
-          userProfileId: +req.userProfile.id,
-          videoId: +videoId,
-        },
-      });
-
-      const mostFavoriteGenres = await prisma.history.findMany({
-        where: {
-          userProfileId: +req.userProfile.id,
-        },
-        select: {
-          video: {
-            select: {
-              movie: {
-                enumGenres: true,
-              },
-            },
-          },
-        },
-      });
-
-      return res.status(200).json({ createHistory });
-    }
-
-    res.status(200).json({ foundHistory });
+    res.status(200).json({ recentWatching });
   } catch (error) {
     next(error);
   }
@@ -365,16 +439,17 @@ exports.endWatching = async (req, res, next) => {
       },
     });
 
-    const addRecentWatching = await prisma.history.update({
+    const editRecentWatching = await prisma.history.update({
       where: {
         id: +findHistory.id,
       },
       data: {
         recentWatching: recentWatching,
+        latestWatchingAt: new Date(),
       },
     });
 
-    res.status(200).json({ addRecentWatching });
+    res.status(200).json({ editRecentWatching });
   } catch (error) {
     next(error);
   }

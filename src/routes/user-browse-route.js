@@ -4,10 +4,12 @@ const profileAuthenticate = require("../middlewares/profile-authenticate");
 const userBrowseController = require("../controllers/user-browse-controller");
 const checkSubscriptionStatusMiddleware = require("../middlewares/check-subscription-status");
 const authenticateProfileMiddleware = require("../middlewares/authenticateProfile");
+const authenticateMiddleware = require("../middlewares/authenticate");
 
 router.get(
   "/movie/:movieId",
-  profileAuthenticate,
+  authenticateMiddleware,
+  authenticateProfileMiddleware,
   userBrowseController.getMovieById
 );
 router.get(
@@ -31,28 +33,26 @@ router.get(
 
 router.get(
   "/search/",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
 router.patch(
   "/Like",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
-  userBrowseController.addLike
-);
-
-router.patch(
-  "/unlike",
-  authenticateProfileMiddleware,
-  userBrowseController.unLike
+  userBrowseController.editLike
 );
 
 router.get(
   "/startWatching/:videoId",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.startWatching
 );
 router.post(
   "/endWatching",
+  authenticateMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.endWatching
 );
