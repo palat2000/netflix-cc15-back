@@ -38,6 +38,9 @@ exports.subscription = async (req, res, next) => {
     if (!user) {
       return next(createError("user not found", 400));
     }
+    if (user.sessionId === sessionId) {
+      return res.status(304).json({ message: "same session id" });
+    }
     if (user.isActive) {
       return res.status(200).json({ message: "still active" });
     }
