@@ -4,9 +4,6 @@ const prisma = require("../models/prisma");
 
 module.exports = async (req, res, next) => {
   try {
-    if (!req.user.isActive) {
-      return res.status(402).json({ message: "subscription required" });
-    }
     const authorization = req.headers.authorizationprofile;
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return next(createError("unauthenticated", 401));

@@ -1,7 +1,6 @@
 const createError = require("../utils/create-error");
 const jwt = require("jsonwebtoken");
 const prisma = require("../models/prisma");
-const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 
 module.exports = async (req, res, next) => {
   try {
@@ -23,23 +22,6 @@ module.exports = async (req, res, next) => {
     }
     delete user.password;
     req.user = user;
-    let subscription;
-    if (req.user.subscriptionId) {
-      subscription = await stripe.subscriptions.retrieve(
-        req.user.subscriptionId
-      );
-    }
-    if (subscription?.status !== "active") {
-      await prisma.user.update({
-        where: {
-          id: req.user.id,
-        },
-        data: {
-          isActive: false,
-        },
-      });
-      req.user.isActive = false;
-    }
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
