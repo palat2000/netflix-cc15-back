@@ -4,11 +4,17 @@ const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {
+    const isTVShow = req.query.isTVShow;
     let movies;
     // if (req.profile.isKid) {
     // movies = await getMovieKids(6);
     // } else {
-    movies = await getMovie(20, "ACTION");
+    //   if (isTVShow === undefined) {
+    // movies = await getMovie(20);
+    //   } else {
+    const isTVShowBoolean = Boolean(+isTVShow);
+    movies = await getMovie(14, isTVShowBoolean);
+    //   }
     // }
     res.status(200).json({ movies });
   } catch (err) {
