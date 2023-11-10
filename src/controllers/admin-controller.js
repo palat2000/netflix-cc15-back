@@ -99,6 +99,10 @@ exports.login = async (req, res, next) => {
   }
 };
 
+exports.getMe = (req, res) => {
+  res.status(200).json({ admin: req.admin });
+};
+
 // exports.createMovie = async (req, res, next) => {
 //   console.log("req.body", req.body);
 //   try {
