@@ -30,7 +30,6 @@ async function getMovie(profileId, genre) {
   }
 
   data.top10 = [...top10Movie];
-
   return data;
 }
 

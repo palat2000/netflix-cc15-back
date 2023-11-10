@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
     console.log("payload = ", payload);
     const profile = await prisma.userProfile.findUnique({
       where: {
-        id: payload.userId,
+        id: +payload.userProfileId,
       },
     });
     if (!profile) {

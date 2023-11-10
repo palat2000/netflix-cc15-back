@@ -15,7 +15,7 @@ async function getMovieKids() {
   for (let i = 0; i < 10; i++) {
     data.top10.push(movie.pop());
   }
-  shuffleArray(fevGenreMovie);
+  shuffleArray(movie);
   for (let i = 0; i < 10; i++) {
     data.row1.push(movie.pop());
   }
