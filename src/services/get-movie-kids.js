@@ -28,21 +28,26 @@ async function getMovieKids(profileId) {
     take: 10,
     skip: 0,
   });
-  const isKids = await prisma.movie.findMany({
-    where: {
-      enumGenres: KID,
-    },
-  });
-  isKids.sort((a, b) => b.release_year - a.release_year);
+  const isKids = [];
   for (let i = 0; i < 10; i++) {
-    data.newReleases[i] = isKids[i];
+    const randomNum = Math.floor(Math.random() * 10);
+    const kidsMovie = await prisma.movie.findMany({
+      where: {
+        enumGenres: KID,
+      },
+      take: 1,
+      skip: randomNum,
+    });
+    isKids.push(kidsMovie.pop());
   }
+  // isKids.sort((a, b) => b.release_year - a.release_year);
+  // for (let i = 0; i < 10; i++) {
+  //   data.newReleases[i] = isKids[i];
+  // }
   shuffleArray(isKids);
   data.continueWatching = continueWatching;
   data.top10 = top10;
-  for (let i = 0; i < 10; i++) {
-    data.isKids.push(isKids.pop());
-  }
+  data.isKids = isKids;
 
   return data;
 }
