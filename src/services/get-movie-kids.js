@@ -31,15 +31,25 @@ async function getMovieKids(profileId) {
   const isKids = [];
   for (let i = 0; i < 10; i++) {
     const randomNum = Math.floor(Math.random() * 10);
-    const kidsMovie = await prisma.movie.findMany({
+    const kidsMovie = await prisma.movie.findFirst({
       where: {
         enumGenres: KID,
       },
       take: 1,
       skip: randomNum,
     });
-    isKids.push(kidsMovie.pop());
+    isKids.push(kidsMovie);
   }
+  const newReleases = await prisma.movie.findMany({
+    where: {
+      enumGenres: KID,
+    },
+    orderBy: {
+      releaseDateForNetflix: "desc",
+    },
+    take: 10,
+    skip: 0,
+  });
   // isKids.sort((a, b) => b.release_year - a.release_year);
   // for (let i = 0; i < 10; i++) {
   //   data.newReleases[i] = isKids[i];
@@ -48,6 +58,7 @@ async function getMovieKids(profileId) {
   data.continueWatching = continueWatching;
   data.top10 = top10;
   data.isKids = isKids;
+  data.newReleases = newReleases;
 
   return data;
 }
