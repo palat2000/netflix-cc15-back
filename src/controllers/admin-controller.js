@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const XLSX = require("xlsx");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
@@ -5,6 +7,97 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 const readXLSXFile = require("../services/read-xlsx-file");
 const insertMovie = require("../services/insert-movie");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../validators/admin-validator");
+
+exports.register = async (req, res, next) => {
+  try {
+    const { value, error } = registerSchema.validate(req.body);
+    console.log(value, "value hereee");
+    if (error) {
+      return next(error);
+    }
+    const usernameDup = await prisma.admin.findFirst({
+      where: {
+        username: value.username,
+      },
+    });
+
+    console.log(usernameDup, "usernameDup====");
+    if (usernameDup) {
+      return next(createError("This username is already used", 400));
+    }
+
+    value.password = await bcrypt.hash(value.password, 12);
+
+    const admin = await prisma.admin.create({
+      data: {
+        username: value.username,
+        password: value.password,
+        createAt: new Date(),
+      },
+    });
+
+    const payload = { adminId: admin.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "HFTAFH",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+
+    res.status(201).json({ accessToken, admin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.login = async (req, res, next) => {
+  try {
+    const { value, error } = loginSchema.validate(req.body);
+    console.log(value, "value=====");
+    if (error) {
+      return next(error);
+    }
+    const admin = await prisma.admin.findFirst({
+      where: {
+        username: value.username,
+      },
+    });
+
+    console.log(admin, "admin ====");
+
+    if (!admin) {
+      return next(
+        createError(
+          "Sorry, we can't find an account with this username. Please try again. ",
+          400
+        )
+      );
+    }
+
+    const isMatch = await bcrypt.compare(value.password, admin.password);
+    if (!isMatch) {
+      return next(createError("Incorrect password. Please try again. ", 400));
+    }
+
+    const payload = { adminId: admin.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "HFTAFH",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+    delete admin.password;
+    res.status(200).json({ accessToken, admin });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // exports.createMovie = async (req, res, next) => {
 //   console.log("req.body", req.body);
@@ -115,7 +208,6 @@ exports.addMovie = async (req, res, next) => {
   }
 };
 
-<<<<<<< HEAD
 exports.prepareFile = async (req, res, next) => {
   try {
     const file = XLSX.readFile(req.file.path);
@@ -182,14 +274,11 @@ exports.prepareFile = async (req, res, next) => {
 //     next(err);
 //   }
 // };
-=======
 exports.readUser = async (req, res, next) => {
   try {
-    
-    const users = await prisma.user.findMany()
-    res.status(200).json( users)
+    const users = await prisma.user.findMany();
+    res.status(200).json(users);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
->>>>>>> develop
+};
