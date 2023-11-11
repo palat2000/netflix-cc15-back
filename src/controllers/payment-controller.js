@@ -36,7 +36,7 @@ exports.subscription = async (req, res, next) => {
       },
     });
     if (paymentHistory) {
-      return res.status(304).json({ message: "same session id" });
+      return next(createError("same session", 304));
     }
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const subscription = await stripe.subscriptions.retrieve(
