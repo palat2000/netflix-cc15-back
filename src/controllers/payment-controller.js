@@ -5,15 +5,15 @@ const createError = require("../utils/create-error");
 
 exports.payment = async (req, res, next) => {
   try {
-    const prices = await stripe.prices.list({
-      lookup_keys: [req.body.lookup_key],
-      expand: ["data.product"],
-    });
+    // const prices = await stripe.prices.list({
+    //   lookup_keys: [req.body.lookup_key],
+    //   expand: ["data.product"],
+    // });
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: "auto",
       line_items: [
         {
-          price: prices.data[0].id,
+          price: req.body.priceId,
           quantity: 1,
         },
       ],
@@ -30,19 +30,13 @@ exports.payment = async (req, res, next) => {
 exports.subscription = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
-    const user = await prisma.user.findUnique({
+    const paymentHistory = await prisma.paymentHistory.findFirst({
       where: {
-        id: req.user.id,
+        transaction: sessionId,
       },
     });
-    if (!user) {
-      return next(createError("user not found", 400));
-    }
-    if (user.sessionId === sessionId) {
+    if (paymentHistory) {
       return res.status(304).json({ message: "same session id" });
-    }
-    if (user.isActive) {
-      return res.status(200).json({ message: "still active" });
     }
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const subscription = await stripe.subscriptions.retrieve(
