@@ -164,6 +164,25 @@ exports.getMyList = async (req, res, next) => {
   }
 };
 
+exports.getMyListById = async (req, res, next) => {
+  try {
+    console.log(req.params.movieId)
+    const isInMyList = await prisma.myList.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: +req.params.movieId
+      },
+      select: {
+        movieId: true,
+        movie: true,
+      },
+    });
+    res.status(200).json({ isInMyList });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.searchBar = async (req, res, next) => {
   try {
     const searchTerm = req.query.q;

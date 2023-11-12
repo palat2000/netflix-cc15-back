@@ -37,6 +37,14 @@ router.get(
 );
 
 router.get(
+  "/mylist/:movieId",
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getMyListById
+);
+
+router.get(
   "/search/",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
