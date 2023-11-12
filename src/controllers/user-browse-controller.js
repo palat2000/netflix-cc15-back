@@ -57,6 +57,13 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
+    const inMyListHistory = await prisma.myList.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: movieId,
+      }
+    })
+
     const enumGenres = await prisma.movie.findFirst({
       where: {
         id: movieId,
@@ -71,9 +78,23 @@ exports.getMovieById = async (req, res, next) => {
       where: {
         AND: [{ NOT: { id: +movieId } }, { enumGenres: enumGenres.enumGenres }],
       },
+      include: {
+        myList: {
+          where: {
+            userProfileId: +req.userProfile.id
+          }
+        }
+      }
     });
 
-    res.status(200).json({ movie: { ...movie, likeHistory }, moreLikeThis });
+    const moreLikeThisData = moreLikeThis.map(el => {
+      if (el.myList.length === 0)
+        el.myList = null
+      return el
+    })
+    console.log("🚀 ~ file: user-browse-controller.js:91 ~ exports.getMovieById= ~ moreLikeThisData:", moreLikeThisData)
+
+    res.status(200).json({ movie: { ...movie, likeHistory, inMyListHistory }, moreLikeThisData });
   } catch (err) {
     next(err);
   }
@@ -81,12 +102,15 @@ exports.getMovieById = async (req, res, next) => {
 
 exports.editMyList = async (req, res, next) => {
   try {
+    console.log(req.body)
+
     const findMyList = await prisma.myList.findFirst({
       where: {
         movieId: +req.body.movieId,
         userProfileId: +req.userProfile.id,
       },
     });
+    console.log("🚀 ~ file: user-browse-controller.js:76 ~ exports.editMyList= ~ findMyList:", findMyList)
 
     let likeAndUnLikeList = null;
     let myList = null;
@@ -96,7 +120,9 @@ exports.editMyList = async (req, res, next) => {
         where: {
           id: +findMyList.id,
         },
+
       });
+      console.log("🚀 ~ file: user-browse-controller.js:87 ~ exports.editMyList= ~ likeAndUnLikeList:", likeAndUnLikeList)
     } else {
       likeAndUnLikeList = await prisma.myList.create({
         data: {
@@ -104,19 +130,15 @@ exports.editMyList = async (req, res, next) => {
           userProfileId: +req.userProfile.id,
         },
       });
-
-      myList = await prisma.myList.findMany({
-        where: {
-          userProfileId: +req.userProfile.id,
-        },
-        select: {
-          movieId: true,
-          movie: true,
-        },
-      });
     }
 
-    res.status(201).json({ likeAndUnLikeList, myList });
+    movieAddtoList = await prisma.myList.findFirst({
+      where: {
+        id: likeAndUnLikeList.id
+      }
+    });
+    console.log("myList", myList)
+    res.status(201).json({ movieAddtoList });
   } catch (error) {
     next(error);
   }
