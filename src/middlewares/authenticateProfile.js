@@ -5,6 +5,7 @@ const prisma = require("../models/prisma");
 module.exports = async (req, res, next) => {
   try {
     const authorization = req.headers.authorizationprofile;
+    console.log("🚀 ~ file: authenticateProfile.js:8 ~ module.exports= ~ authorization:", authorization)
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return next(createError("unauthenticated", 401));
     }
