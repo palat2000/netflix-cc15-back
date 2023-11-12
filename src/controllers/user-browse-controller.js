@@ -114,6 +114,7 @@ exports.editMyList = async (req, res, next) => {
 
     let likeAndUnLikeList = null;
     let myList = null;
+    let status = null
 
     if (findMyList) {
       likeAndUnLikeList = await prisma.myList.delete({
@@ -123,6 +124,7 @@ exports.editMyList = async (req, res, next) => {
 
       });
       console.log("🚀 ~ file: user-browse-controller.js:87 ~ exports.editMyList= ~ likeAndUnLikeList:", likeAndUnLikeList)
+      status = `remove movieId:${+req.body.movieId} from MyList`
     } else {
       likeAndUnLikeList = await prisma.myList.create({
         data: {
@@ -130,6 +132,7 @@ exports.editMyList = async (req, res, next) => {
           userProfileId: +req.userProfile.id,
         },
       });
+      status = `add movieId:${+req.body.movieId} to MyList`
     }
 
     movieAddtoList = await prisma.myList.findFirst({
@@ -137,8 +140,8 @@ exports.editMyList = async (req, res, next) => {
         id: likeAndUnLikeList.id
       }
     });
-    console.log("myList", myList)
-    res.status(201).json({ movieAddtoList });
+    console.log("movieAddtoList", movieAddtoList)
+    res.status(201).json({ movieAddtoList, status });
   } catch (error) {
     next(error);
   }
