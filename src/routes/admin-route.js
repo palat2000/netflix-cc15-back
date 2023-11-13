@@ -17,4 +17,14 @@ router.post(
   adminController.prepareFile
 );
 
+router.post("/upload",
+  upload.single("file"),
+  adminController.createMovie
+)
+
+// router.post(
+//   "/get-movie",
+//   adminController.get_movie
+// )
+
 module.exports = router;

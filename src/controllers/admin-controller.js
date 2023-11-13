@@ -6,88 +6,100 @@ const fs = require("fs/promises");
 const readXLSXFile = require("../services/read-xlsx-file");
 const insertMovie = require("../services/insert-movie");
 
-// exports.createMovie = async (req, res, next) => {
-//   console.log("req.body", req.body);
-//   try {
-//     const { title, release_year, detail, isTVShow, enumGenres, actorName } =
-//       req.body;
+exports.createMovie = async (req, res, next) => {
+  try {
+    const actorNameArray = req.body.actorName.split(',')
+    const titleMovieDup = await prisma.movie.findFirst({
+      where: {
+        title: req.body.title,
+      },
+    });
 
-//     const titleMovieDup = await prisma.movie.findFirst({
-//       where: {
-//         title: title,
-//       },
-//     });
+    if (titleMovieDup) {
+      return next(createError("Already add this movie name", 400));
+    }
 
-//     if (titleMovieDup) {
-//       return next(createError("Already add this movie name", 400));
-//     }
-//     console.log(titleMovieDup);
-//     console.log("sard");
-//     console.log(req.files["image"][0].path, "meow");
-//     console.log(req.files["trailer"][0].path, "meow");
+    const Genres = req.body.genres.toUpperCase()
+    
+    const movie = await prisma.movie.create({
+      data: {
+        title: req.body.title.toLowerCase(),
+        release_year: req.body.release_year,
+        detail: req.body.detail.toLowerCase(),
+        isTVShow: !!req.body.isTVShow,
+        image: req.body.image,
+        enumGenres: Genres,
+        trailer: req.body.trailer
 
-//     let imageUrl;
-//     let trailerUrl;
+      }
+    })
 
-//     let body = {};
 
-//     if (req?.files["image"]) {
-//       imageUrl = await upload(req.files["image"][0].path);
-//       console.log(imageUrl);
-//       body.image = imageUrl;
-//     }
-//     if (req?.files["trailer"]) {
-//       trailerUrl = await upload(req.files["trailer"][0].path);
-//       console.log(trailerUrl);
-//       body.trailer = trailerUrl;
-//     }
-//     body = {
-//       ...body,
-//       title: title,
-//       release_year: release_year,
-//       detail: detail,
-//       isTVShow: !!isTVShow,
-//       enumGenres: enumGenres,
-//     };
 
-//     const createMovie = await prisma.movie.create({
-//       data: body,
-//     });
+    actorNameArray.forEach(async (e) => {
+      const checkActors = await prisma.actors.findFirst({
+        where: {
+          name: e.toLowerCase()
+        }
+      })
 
-//     actorName.forEach(async (el) => {
-//       const actors = await prisma.actors.createMany({
-//         data: {
-//           movieId: createMovie.id,
-//           name: el,
-//         },
-//       });
-//     });
+      if (!checkActors) {
+        const actorIdcheck = await prisma.actors.create({
+          data: { name: e.toLowerCase() }
+        })
+        if (actorIdcheck) {
+          await prisma.actorMovie.create({
+            data: {
+              actorsId: actorIdcheck.id,
+              movieId: movie.id
+            }
+          })
+        }
 
-//     const movie = await prisma.movie.findMany({
-//       where: {
-//         id: createMovie.id,
-//       },
-//       include: {
-//         actors: {
-//           select: {
-//             name: true,
-//           },
-//         },
-//       },
-//     });
-//     res.status(201).json({ movie });
-//   } catch (error) {
-//     console.log(error);
-//     next(error);
-//   } finally {
-//     if (req.files["image"][0].path) {
-//       fs.unlink(req.files["image"][0].path);
-//     }
-//     if (req.files["trailer"][0].path) {
-//       fs.unlink(req.files["trailer"][0].path);
-//     }
-//   }
-// };
+      }
+      if (checkActors) {
+        await prisma.actorMovie.create({
+          data: {
+            actorsId: checkActors.id,
+            movieId: movie.id
+          }
+        })
+      }
+    })
+
+
+    const episodeDup = await prisma.video.findFirst({
+      where: {
+        videoEpisodeName: req.body.videoEpisodeName.toLowerCase(),
+        videoUrl: req.body.video,
+        videoEpisodeNo: +req.body.videoEpisodeNo
+      },
+    });
+
+    if (episodeDup) {
+      return next(createError("Already add this Episode", 400));
+    }
+
+    await prisma.video.create({
+      data: {
+        videoEpisodeName: req.body.videoEpisodeName.toLowerCase(),
+        videoUrl: req.body.video,
+        videoEpisodeNo: +req.body.videoEpisodeNo,
+        movieId: movie.id
+      }
+    })
+
+
+
+
+
+
+    res.status(201).json({mressage:"Success"});
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
 
 exports.deleteMovie = async (req, res, next) => {
   try {
