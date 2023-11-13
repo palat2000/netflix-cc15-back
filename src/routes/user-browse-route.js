@@ -14,9 +14,9 @@ router.get(
 );
 router.get(
   "/",
-  authenticateMiddleware,
-  checkSubscriptionMiddleware,
-  authenticateProfileMiddleware,
+  // authenticateMiddleware,
+  // checkSubscriptionMiddleware,
+  // authenticateProfileMiddleware,
   userBrowseController.getMovie
 );
 

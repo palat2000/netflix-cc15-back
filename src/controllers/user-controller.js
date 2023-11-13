@@ -2,6 +2,7 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
+const { SEVENDAYS } = require("../config/constant");
 
 exports.createUserProfile = async (req, res, next) => {
   try {
@@ -125,5 +126,22 @@ exports.editUserProfile = async (req, res, next) => {
     if (req?.file?.path) {
       fs.unlink(req?.file?.path);
     }
+  }
+};
+
+exports.getNotification = async (req, res, next) => {
+  try {
+    const today = new Date();
+    const movies = await prisma.movie.findMany();
+    const notification = movies.reduce((acc, movie) => {
+      if (new Date(movie.releaseDateForNetflix) + SEVENDAYS > today) {
+        acc.push(movie);
+      }
+      return acc;
+    }, []);
+    console.log(notification);
+    res.status(200).json({ notification });
+  } catch (err) {
+    next(err);
   }
 };

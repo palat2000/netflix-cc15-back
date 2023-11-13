@@ -27,4 +27,11 @@ router.patch(
   userController.editUserProfile
 );
 
+router.get(
+  "/notification",
+  // authenticateMiddleware,
+  // checkSubscriptionMiddleware,
+  userController.getNotification
+);
+
 module.exports = router;
