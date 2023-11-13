@@ -328,7 +328,7 @@ exports.editLike = async (req, res, next) => {
     let likeMovieHistory;
     let editLike;
     let status;
-    let likedata;
+    let likeData;
 
     if (!checkUserProfileLike) {
       likeMovieHistory = await prisma.likeMovie.create({
@@ -347,8 +347,8 @@ exports.editLike = async (req, res, next) => {
         },
       });
 
-      likedata = likeMovieHistory
-      status = `MovieId:${+req.body.movieId} is liked by ${+req.userProfile.id}`
+      likeData = likeMovieHistory
+      status = `MovieId:${+req.body.movieId} is liked by userId:${+req.userProfile.id}`
     } else {
       likeMovieHistory = await prisma.likeMovie.delete({
         where: {
@@ -364,11 +364,11 @@ exports.editLike = async (req, res, next) => {
         },
       });
       console.log("kaow ja");
-      likedata = null
-      status = `MovieId:${+req.body.movieId} is remove like by ${+req.userProfile.id}`
+      likeData = null
+      status = `MovieId:${+req.body.movieId} is remove like by userId:${+req.userProfile.id}`
     }
-
-    res.status(201).json({ likeMovieHistory, editLike, likedata, status });
+    console.log(likeData, status)
+    res.status(201).json({ likeMovieHistory, editLike, likeData, status });
   } catch (error) {
     next(error);
   }
