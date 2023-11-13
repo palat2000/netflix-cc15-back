@@ -164,6 +164,20 @@ exports.readMovieList = async (req, res, next) => {
     console.log(error)
   }
 }
+exports.deleteMovieList = async (req, res, next) => {
+  try {
+console.log(req.body.id)
+
+    const deleteMovieList = await prisma.movie.delete({
+        where: {
+            id: req.body.id
+        }
+    })
+    res.status(200).json( movie)
+  } catch (error) {
+    console.log(error)
+  }
+}
 exports.editMovieList = async (req, res, next) => {
   try {
 
@@ -173,9 +187,7 @@ exports.editMovieList = async (req, res, next) => {
 let imageUrl
     if (req?.file?.path) {
          imageUrl = await upload(req.file.path);
-        // body.profileImageUrl = imageUrl;
       }
-      console.log(imageUrl)
     const editMovie = await prisma.movie.update({
 
         where: {
