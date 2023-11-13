@@ -4,10 +4,9 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 
 exports.createUserProfile = async (req, res, next) => {
-  // console.log("req.body", req.body);
-  console.log("createeeee hereeee");
   try {
     const { userProfileName, isKid, userId } = req.body;
+    console.log("isKid", isKid);
     const userProfileNameDup = await prisma.userProfile.findFirst({
       where: {
         userId: +userId,
@@ -18,20 +17,20 @@ exports.createUserProfile = async (req, res, next) => {
     if (userProfileNameDup) {
       return next(createError("Already add this profile name", 400));
     }
-
     if (isKid === "true") favoriteGenres = "KID";
-    console.log(favoriteGenres);
+
+    console.log(!isKid, "sssssssssssssssssssssssssss");
+    console.log(favoriteGenres, "sssssssssssssssssssssssssss");
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,
       profileImageUrl: null,
       userId: +userId,
+      isKid: isKid === "true" ? true : false,
     };
 
     if (req?.file?.path) {
-      // console.log("sssss")
       const imageUrl = await upload(req.file.path);
-      // console.log(imageUrl);
       body.profileImageUrl = imageUrl;
     }
 
@@ -40,6 +39,7 @@ exports.createUserProfile = async (req, res, next) => {
     });
 
     res.status(201).json({ message: "userProfile created", userProfile });
+    console.log(userProfile);
   } catch (error) {
     next(error);
   } finally {
@@ -67,7 +67,10 @@ exports.deleteUserProfile = async (req, res, next) => {
 
 exports.editUserProfile = async (req, res, next) => {
   try {
-    console.log(req.body, "req.body");
+    console.log(
+      req.file,
+      "req.fileeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    );
     const { userProfileName, userProfileId } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
@@ -100,7 +103,6 @@ exports.editUserProfile = async (req, res, next) => {
           : [],
       },
     });
-
     if (dupUserProfileNameWithUserId.length > 0) {
       return next(createError("This userProfileName is already use", 400));
     }

@@ -3,8 +3,18 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
-const readXLSXFile = require("../services/read-xlsx-file");
-const insertMovie = require("../services/insert-movie");
+// const {
+//   registerSchema,
+//   loginSchema,
+// } = require("../validators/admin-validator");
+
+exports.login = async (req, res, next) => {
+  // try {
+  //   const { value, error } = loginSchema.validate;
+  // } catch (error) {
+  //   next(error);
+  // }
+};
 
 exports.createMovie = async (req, res, next) => {
   try {
@@ -144,52 +154,13 @@ exports.prepareFile = async (req, res, next) => {
   }
 };
 
-// exports.quickAdd = async (req, res, next) => {
-//   try {
-//     const {
-//       title,
-//       release_year,
-//       detail,
-//       isTVShow,
-//       enumGenres,
-//       actorName,
-//       image,
-//       trailer,
-//     } = req.body;
-//     const body = {
-//       title,
-//       release_year,
-//       detail,
-//       isTVShow: !!isTVShow,
-//       enumGenres,
-//       image,
-//       trailer,
-//     };
-//     const createMovie = await prisma.movie.create({
-//       data: body,
-//     });
-//     actorName.forEach(async (el) => {
-//       await prisma.actors.createMany({
-//         data: {
-//           movieId: createMovie.id,
-//           name: el,
-//         },
-//       });
-//     });
-//     const movie = await prisma.movie.findMany({
-//       where: {
-//         id: createMovie.id,
-//       },
-//       include: {
-//         actors: {
-//           select: {
-//             name: true,
-//           },
-//         },
-//       },
-//     });
-//     res.status(200).json({ movie });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+
+exports.readUser = async (req, res, next) => {
+  try {
+    
+    const users = await prisma.user.findMany()
+    res.status(200).json( users)
+  } catch (error) {
+    console.log(error)
+  }
+}

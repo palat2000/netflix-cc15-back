@@ -1,14 +1,13 @@
 const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
-const prisma = require("../models/prisma");
 
 module.exports = async (req, res, next) => {
   try {
-    let subscription;
-    if (req.user.subscriptionId) {
-      subscription = await stripe.subscriptions.retrieve(
-        req.user.subscriptionId
-      );
+    if (!req.user.subscriptionId) {
+      return res.status(402).json({ message: "subscription required" });
     }
+    let subscription = await stripe.subscriptions.retrieve(
+      req.user.subscriptionId
+    );
     if (subscription?.status !== "active") {
       await prisma.user.update({
         where: {
@@ -18,7 +17,7 @@ module.exports = async (req, res, next) => {
           isActive: false,
         },
       });
-      req.user.isActive = false;
+      return res.status(402).json({ message: "subscription required" });
     }
     next();
   } catch (err) {

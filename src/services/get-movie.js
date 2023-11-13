@@ -1,35 +1,136 @@
 const prisma = require("../models/prisma");
 const shuffleArray = require("./shuffle-array");
+const {
+  COMEDIES,
+  ACTION,
+  HORROR,
+  SPORTS,
+  KID,
+  ROMANCE,
+} = require("../config/constant");
 
-async function getMovie(profileId, genre) {
-  const data = { fevGenre: [], history: [], top10: [] };
-  const historyWatchMovie = await prisma.history.findMany({
-    where: {
-      userProfileId: profileId,
-    },
-  });
-  const top10Movie = await prisma.movie.findMany({
-    orderBy: {
-      count_watching: "desc",
-    },
-    take: 10,
-    skip: 0,
-  });
-  const recommendFevGenreMovie = await prisma.movie.findMany({
-    where: {
-      enumGenres: genre,
-    },
-  });
-  shuffleArray(historyWatchMovie);
-  shuffleArray(recommendFevGenreMovie);
-  for (let i = 0; i < 10; i++) {
-    data.fevGenre.push(recommendFevGenreMovie.pop());
+async function getMovieByGenre(genre, isTVShow) {
+  const genreArr = [];
+  if (isTVShow === undefined) {
+    const genreMovie = await prisma.movie.findMany({
+      where: {
+        enumGenres: genre,
+      },
+    });
+    shuffleArray(genreMovie);
+    for (let i = 0; i < 10; i++) {
+      genreArr.push(genreMovie.pop());
+    }
+  } else {
+    const genreMovie = await prisma.movie.findMany({
+      where: {
+        enumGenres: genre,
+        isTVShow,
+      },
+    });
+    shuffleArray(genreMovie);
+    for (let i = 0; i < 10; i++) {
+      genreArr.push(genreMovie.pop());
+    }
   }
-  for (let i = 0; i < 10; i++) {
-    data.history.push(historyWatchMovie.pop());
-  }
+  return genreArr;
+}
 
-  data.top10 = [...top10Movie];
+async function getMovie(profileId, isTVShow) {
+  const data = {};
+  if (isTVShow === undefined) {
+    const continueWatching = await prisma.history.findMany({
+      where: {
+        userProfileId: profileId,
+      },
+      include: {
+        video: {
+          include: {
+            movie: true,
+          },
+        },
+      },
+      orderBy: {
+        latestWatchingAt: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    const top10 = await prisma.movie.findMany({
+      orderBy: {
+        count_watching: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    const newReleases = await prisma.movie.findMany({
+      orderBy: {
+        releaseDateForNetflix: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    data.continueWatching = continueWatching;
+    data.top10 = top10;
+    data.newReleases = newReleases;
+    data.action = await getMovieByGenre(ACTION);
+    data.sport = await getMovieByGenre(SPORTS);
+    data.comedy = await getMovieByGenre(COMEDIES);
+    data.horror = await getMovieByGenre(HORROR);
+    data.kids = await getMovieByGenre(KID);
+    data.romantic = await getMovieByGenre(ROMANCE);
+  } else {
+    const continueWatchingMovie = await prisma.history.findMany({
+      where: {
+        userProfileId: profileId,
+      },
+      include: {
+        video: {
+          include: {
+            movie: true,
+          },
+        },
+      },
+      orderBy: {
+        latestWatchingAt: "desc",
+      },
+    });
+    const continueWatching = continueWatchingMovie.reduce((acc, movie) => {
+      if (acc.length < 10 && movie.video.movie.isTVShow === isTVShow) {
+        acc.push(movie);
+      }
+      return acc;
+    }, []);
+    const top10 = await prisma.movie.findMany({
+      where: {
+        isTVShow: isTVShow,
+      },
+      orderBy: {
+        count_watching: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    const newReleases = await prisma.movie.findMany({
+      where: {
+        isTVShow,
+      },
+      orderBy: {
+        releaseDateForNetflix: "desc",
+      },
+      take: 10,
+      skip: 0,
+    });
+    data.continueWatching = continueWatching;
+    data.top10 = top10;
+    data.newReleases = newReleases;
+    data.action = await getMovieByGenre(ACTION, isTVShow);
+    data.sport = await getMovieByGenre(SPORTS, isTVShow);
+    data.comedy = await getMovieByGenre(COMEDIES, isTVShow);
+    data.horror = await getMovieByGenre(HORROR, isTVShow);
+    data.kids = await getMovieByGenre(KID, isTVShow);
+    data.romantic = await getMovieByGenre(ROMANCE, isTVShow);
+  }
 
   return data;
 }

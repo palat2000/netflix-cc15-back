@@ -11,6 +11,7 @@ router.post(
   adminController.addMovie
 );
 
+<<<<<<< HEAD
 router.post(
   "/prepare-file", // authenticateMiddleware,
   upload.single("file"),
@@ -21,6 +22,10 @@ router.post("/upload",
   upload.single("file"),
   adminController.createMovie
 )
+=======
+// router.post("/", adminController.quickAdd);
+router.get("/user", adminController.readUser);
+>>>>>>> develop
 
 // router.post(
 //   "/get-movie",
