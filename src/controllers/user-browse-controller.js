@@ -515,7 +515,11 @@ exports.getVideoById = async (req, res, next) => {
         id: +videoId
       },
       include: {
-        history: true
+        history: {
+          where: {
+            userProfileId: +req.userProfile.id
+          }
+        }
       }
     })
 
@@ -524,7 +528,11 @@ exports.getVideoById = async (req, res, next) => {
         AND: [{ movieId: +videoData.movieId }, { NOT: { id: +videoId } }]
       },
       include: {
-        history: true
+        history: {
+          where: {
+            userProfileId: +req.userProfile.id
+          }
+        }
       }
     })
 
