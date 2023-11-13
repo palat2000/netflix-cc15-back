@@ -173,7 +173,7 @@ console.log(req.body.id)
             id: req.body.id
         }
     })
-    res.status(200).json( movie)
+    res.status(200).json( deleteMovieList)
   } catch (error) {
     console.log(error)
   }
