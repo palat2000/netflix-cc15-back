@@ -75,4 +75,12 @@ router.post(
   userBrowseController.endWatching
 );
 
+router.get(
+  '/getVideo/:videoId',
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getVideoById
+)
+
 module.exports = router;

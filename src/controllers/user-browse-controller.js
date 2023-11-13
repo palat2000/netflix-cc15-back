@@ -505,3 +505,31 @@ exports.endWatching = async (req, res, next) => {
     next(error);
   }
 };
+
+
+exports.getVideoById = async (req, res, next) => {
+  try {
+    const { videoId } = req.params;
+    const videoData = await prisma.video.findFirst({
+      where: {
+        id: +videoId
+      },
+      include: {
+        history: true
+      }
+    })
+
+    const otherVideoOfMovie = await prisma.video.findMany({
+      where: {
+        AND: [{ movieId: +videoData.movieId }, { NOT: { id: +videoId } }]
+      },
+      include: {
+        history: true
+      }
+    })
+
+    res.status(200).json({ videoData, otherVideoOfMovie });
+  } catch (error) {
+    next(error)
+  }
+}
