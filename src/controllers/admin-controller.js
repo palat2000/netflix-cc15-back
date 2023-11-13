@@ -153,3 +153,14 @@ exports.readUser = async (req, res, next) => {
     console.log(error)
   }
 }
+exports.readMovieList = async (req, res, next) => {
+  try {
+
+    console.log("first")
+    
+    const movie = await prisma.movie.findMany()
+    res.status(200).json( movie)
+  } catch (error) {
+    console.log(error)
+  }
+}
