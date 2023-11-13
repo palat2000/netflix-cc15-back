@@ -18,7 +18,7 @@ const upload = require("../middlewares/upload");
 router.get("/user", adminController.readUser);
 router.get("/read-movieList", adminController.readMovieList);
 // router.post("/delete-movieList", adminController.deleteMovieList);
-// router.patch("/edit-movieList",upload.single("movieListImage"), adminController.editMovieList);
+router.patch("/edit-movieList",upload.single("movieListImage"), adminController.editMovieList);
 // router.post(
 //   "/",
 //   authenticateMiddleware,

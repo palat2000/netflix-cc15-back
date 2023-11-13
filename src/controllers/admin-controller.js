@@ -164,3 +164,43 @@ exports.readMovieList = async (req, res, next) => {
     console.log(error)
   }
 }
+exports.editMovieList = async (req, res, next) => {
+  try {
+
+    console.log("req.body naja ",req.body)
+    console.log("filllllleeeee",req.file)
+
+let imageUrl
+    if (req?.file?.path) {
+         imageUrl = await upload(req.file.path);
+        // body.profileImageUrl = imageUrl;
+      }
+      console.log(imageUrl)
+    const editMovie = await prisma.movie.update({
+
+        where: {
+            id:+req.body.editTargetId
+        },
+        data: {
+            title: req.body.title,
+         release_year: req.body.year   ,
+         count_watching: +req.body.countWatch,
+         count_liked: +req.body.countLike,
+         detail: req.body.detail,
+         isTVShow: !!req.body.tvShow,
+         enumGenres: req.body.enumGen,
+         image:imageUrl
+        }
+    })
+
+    res.status(200).json( editMovie )
+    console.log("resultttttttttttttttttttttttttttttt" ,editMovie )
+  } catch (error) {
+    console.log(error)
+  }finally {
+    // console.log("req", req);
+    if (req?.file?.path) {
+      fs.unlink(req?.file?.path);
+    }
+  }
+}
