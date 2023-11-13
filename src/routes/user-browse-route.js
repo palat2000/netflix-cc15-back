@@ -51,6 +51,7 @@ router.get(
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
+
 router.patch(
   "/Like",
   authenticateMiddleware,
