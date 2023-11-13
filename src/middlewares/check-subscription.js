@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
     if (!req.user.subscriptionId) {
       return next(createError("subscription required", 402));
     }
-    if (req.user.expiredDate < new Date()) {
+    if (new Date(req.user.expiredDate) < new Date()) {
       let subscription = await stripe.subscriptions.retrieve(
         req.user.subscriptionId
       );
