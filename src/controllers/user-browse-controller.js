@@ -301,3 +301,80 @@ exports.unLike = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.startWatching = async (req, res, next) => {
+  try {
+    const { videoId } = req.params;
+    console.log(videoId, "videoId here");
+
+    const foundHistory = await prisma.history.findFirst({
+      where: {
+        videoId: +videoId,
+        userProfileId: +req.userProfile.id,
+      },
+      select: {
+        recentWatching: true,
+      },
+    });
+
+    if (!foundHistory) {
+      const createHistory = await prisma.history.create({
+        data: {
+          userProfileId: +req.userProfile.id,
+          videoId: +videoId,
+        },
+      });
+
+      const mostFavoriteGenres = await prisma.history.findMany({
+        where: {
+          userProfileId: +req.userProfile.id,
+        },
+        select: {
+          video: {
+            select: {
+              movie: {
+                enumGenres: true,
+              },
+            },
+          },
+        },
+      });
+
+      return res.status(200).json({ createHistory });
+    }
+
+    res.status(200).json({ foundHistory });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.endWatching = async (req, res, next) => {
+  try {
+    const { videoId, recentWatching } = req.body;
+    console.log(videoId, "videoId here", recentWatching, "recent watching");
+
+    const findHistory = await prisma.history.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        videoId: +videoId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const addRecentWatching = await prisma.history.update({
+      where: {
+        id: +findHistory.id,
+      },
+      data: {
+        recentWatching: recentWatching,
+      },
+    });
+
+    res.status(200).json({ addRecentWatching });
+  } catch (error) {
+    next(error);
+  }
+};
