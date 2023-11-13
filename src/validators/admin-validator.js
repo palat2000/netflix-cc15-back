@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const registerSchema = Joi.object({
   username: Joi.string()
-    .pattern(/^[a-zA-z0-9]{5,30}$/)
+    .pattern(/^[a-zA-z0-9]{6,30}$/)
     .trim()
     .required(),
   password: Joi.string()
