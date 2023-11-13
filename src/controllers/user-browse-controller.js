@@ -495,7 +495,7 @@ exports.endWatching = async (req, res, next) => {
         id: +findHistory.id,
       },
       data: {
-        recentWatching: recentWatching,
+        recentWatching: String(recentWatching),
         latestWatchingAt: new Date(),
       },
     });
