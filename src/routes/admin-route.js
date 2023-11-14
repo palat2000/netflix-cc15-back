@@ -25,6 +25,6 @@ router.get("/user", adminController.readUser);
 // );
 
 router.post("/", authenticateMiddleware);
-router.get("/top_movie", adminController.getTopMovie);
+router.get("/user_movie", adminController.getNewestUserAndTopMovie);
 
 module.exports = router;

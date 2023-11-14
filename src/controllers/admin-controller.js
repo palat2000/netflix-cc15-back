@@ -165,11 +165,23 @@ exports.readUser = async (req, res, next) => {
   }
 };
 
-exports.getTopMovie = async (req, res, next) => {
+exports.getNewestUserAndTopMovie = async (req, res, next) => {
   try {
-    const comedies = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "COMEDIES",
+    const newestUser = await prisma.user.findMany({
+      orderBy: {
+        activeAt: "desc",
+      },
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      take: 5,
+    });
+
+    const topMovie = await prisma.movie.findMany({
+      orderBy: {
+        count_watching: "desc",
       },
       select: {
         title: true,
@@ -179,107 +191,15 @@ exports.getTopMovie = async (req, res, next) => {
         isTVShow: true,
         enumGenres: true,
       },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
-    });
-    console.log(comedies);
-
-    const action = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "ACTION",
-      },
-      select: {
-        title: true,
-        release_year: true,
-        count_watching: true,
-        count_liked: true,
-        isTVShow: true,
-        enumGenres: true,
-      },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
-    });
-    console.log(action);
-
-    const horror = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "HORROR",
-      },
-      select: {
-        title: true,
-        release_year: true,
-        count_watching: true,
-        count_liked: true,
-        isTVShow: true,
-        enumGenres: true,
-      },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
+      take: 10,
     });
 
-    const sports = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "SPORTS",
-      },
-      select: {
-        title: true,
-        release_year: true,
-        count_watching: true,
-        count_liked: true,
-        isTVShow: true,
-        enumGenres: true,
-      },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
-    });
+    const userAndMovie = {
+      newestUser: newestUser,
+      topMovie: topMovie,
+    };
 
-    const kid = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "KID",
-      },
-      select: {
-        title: true,
-        release_year: true,
-        count_watching: true,
-        count_liked: true,
-        isTVShow: true,
-        enumGenres: true,
-      },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
-    });
-
-    const romance = await prisma.movie.findFirst({
-      where: {
-        enumGenres: "ROMANCE",
-      },
-      select: {
-        title: true,
-        release_year: true,
-        count_watching: true,
-        count_liked: true,
-        isTVShow: true,
-        enumGenres: true,
-      },
-      orderBy: {
-        count_watching: "desc",
-      },
-      take: 1,
-    });
-
-    let genres = [comedies, action, horror, sports, kid, romance];
-
-    res.status(200).json(genres);
+    res.status(200).json(userAndMovie);
   } catch (error) {
     console.log(error);
   }
