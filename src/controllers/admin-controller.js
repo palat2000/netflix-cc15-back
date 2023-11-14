@@ -158,7 +158,17 @@ exports.quickAdd = async (req, res, next) => {
 
 exports.readUser = async (req, res, next) => {
   try {
-    const allUserswithPassword = await prisma.user.findMany();
+    const allUserswithPassword = await prisma.user.findMany({
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      orderBy: {
+        activeAt: "desc",
+      },
+      take: 5,
+    });
 
     const allUsersWithoutPassword = allUserswithPassword.map((user) => {
       const { password, ...allUsersWithoutPassword } = user;
