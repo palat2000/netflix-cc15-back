@@ -166,7 +166,7 @@ exports.readMovieList = async (req, res, next) => {
 }
 exports.deleteMovieList = async (req, res, next) => {
   try {
-console.log(req.body.id)
+console.log("delllllllllllllllllllllllllllllllllll",req.body.id)
 
     const deleteMovieList = await prisma.movie.delete({
         where: {
@@ -178,6 +178,8 @@ console.log(req.body.id)
     console.log(error)
   }
 }
+
+
 exports.editMovieList = async (req, res, next) => {
   try {
 
