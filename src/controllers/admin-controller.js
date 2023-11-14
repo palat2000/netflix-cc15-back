@@ -3,6 +3,8 @@ const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
+const readXLSXFile = require("../services/read-xlsx-file");
+const insertMovie = require("../services/insert-movie");
 // const {
 //   registerSchema,
 //   loginSchema,
@@ -18,6 +20,7 @@ exports.login = async (req, res, next) => {
 
 exports.createMovie = async (req, res, next) => {
   try {
+    console.log(req.body,"BODYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
     const actorNameArray = req.body.actorName.split(',')
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
@@ -37,9 +40,11 @@ exports.createMovie = async (req, res, next) => {
         release_year: req.body.release_year,
         detail: req.body.detail.toLowerCase(),
         isTVShow: !!req.body.isTVShow,
-        image: req.body.image,
+        image: req.body.coverImage,
         enumGenres: Genres,
-        trailer: req.body.trailer
+        trailer: req.body.trailer,
+        releaseDateForNetflix:new Date(req.body.releaseDateForNetflix)
+        
 
       }
     })
@@ -102,14 +107,16 @@ exports.createMovie = async (req, res, next) => {
 
 
 
+    
 
-
-    res.status(201).json({mressage:"Success"});
+    res.status(201).json({message:"Success"});
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
+
+
 
 exports.deleteMovie = async (req, res, next) => {
   try {

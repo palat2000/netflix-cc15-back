@@ -9,10 +9,6 @@ const GENRES = [COMEDIES, ACTION, HORROR, SPORTS, KID, ROMANCE];
 
 module.exports = {
   URL,
-<<<<<<< HEAD
-  KID,
-=======
->>>>>>> develop
   COMEDIES,
   ACTION,
   HORROR,
