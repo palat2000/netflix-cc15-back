@@ -57,6 +57,13 @@ exports.getMovieById = async (req, res, next) => {
       },
     });
 
+    const inMyListHistory = await prisma.myList.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: movieId,
+      }
+    })
+
     const enumGenres = await prisma.movie.findFirst({
       where: {
         id: movieId,
@@ -71,9 +78,23 @@ exports.getMovieById = async (req, res, next) => {
       where: {
         AND: [{ NOT: { id: +movieId } }, { enumGenres: enumGenres.enumGenres }],
       },
+      include: {
+        myList: {
+          where: {
+            userProfileId: +req.userProfile.id
+          }
+        }
+      }
     });
 
-    res.status(200).json({ movie: { ...movie, likeHistory }, moreLikeThis });
+    const moreLikeThisData = moreLikeThis.map(el => {
+      if (el.myList.length === 0)
+        el.myList = null
+      return el
+    })
+    console.log("🚀 ~ file: user-browse-controller.js:91 ~ exports.getMovieById= ~ moreLikeThisData:", moreLikeThisData)
+
+    res.status(200).json({ movie: { ...movie, likeHistory, inMyListHistory }, moreLikeThisData });
   } catch (err) {
     next(err);
   }
@@ -81,22 +102,29 @@ exports.getMovieById = async (req, res, next) => {
 
 exports.editMyList = async (req, res, next) => {
   try {
+    console.log(req.body)
+
     const findMyList = await prisma.myList.findFirst({
       where: {
         movieId: +req.body.movieId,
         userProfileId: +req.userProfile.id,
       },
     });
+    console.log("🚀 ~ file: user-browse-controller.js:76 ~ exports.editMyList= ~ findMyList:", findMyList)
 
     let likeAndUnLikeList = null;
     let myList = null;
+    let status = null
 
     if (findMyList) {
       likeAndUnLikeList = await prisma.myList.delete({
         where: {
           id: +findMyList.id,
         },
+
       });
+      console.log("🚀 ~ file: user-browse-controller.js:87 ~ exports.editMyList= ~ likeAndUnLikeList:", likeAndUnLikeList)
+      status = `remove movieId:${+req.body.movieId} from MyList`
     } else {
       likeAndUnLikeList = await prisma.myList.create({
         data: {
@@ -104,19 +132,16 @@ exports.editMyList = async (req, res, next) => {
           userProfileId: +req.userProfile.id,
         },
       });
-
-      myList = await prisma.myList.findMany({
-        where: {
-          userProfileId: +req.userProfile.id,
-        },
-        select: {
-          movieId: true,
-          movie: true,
-        },
-      });
+      status = `add movieId:${+req.body.movieId} to MyList`
     }
 
-    res.status(201).json({ likeAndUnLikeList, myList });
+    movieAddtoList = await prisma.myList.findFirst({
+      where: {
+        id: likeAndUnLikeList.id
+      }
+    });
+    console.log("movieAddtoList", movieAddtoList)
+    res.status(201).json({ movieAddtoList, status });
   } catch (error) {
     next(error);
   }
@@ -134,6 +159,25 @@ exports.getMyList = async (req, res, next) => {
       },
     });
     res.status(200).json({ myList });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMyListById = async (req, res, next) => {
+  try {
+    console.log(req.params.movieId)
+    const isInMyList = await prisma.myList.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: +req.params.movieId
+      },
+      select: {
+        movieId: true,
+        movie: true,
+      },
+    });
+    res.status(200).json({ isInMyList });
   } catch (error) {
     next(error);
   }
@@ -283,6 +327,8 @@ exports.editLike = async (req, res, next) => {
 
     let likeMovieHistory;
     let editLike;
+    let status;
+    let likeData;
 
     if (!checkUserProfileLike) {
       likeMovieHistory = await prisma.likeMovie.create({
@@ -300,6 +346,9 @@ exports.editLike = async (req, res, next) => {
           count_liked: countLike.count_liked + 1,
         },
       });
+
+      likeData = likeMovieHistory
+      status = `MovieId:${+req.body.movieId} is liked by userId:${+req.userProfile.id}`
     } else {
       likeMovieHistory = await prisma.likeMovie.delete({
         where: {
@@ -315,9 +364,11 @@ exports.editLike = async (req, res, next) => {
         },
       });
       console.log("kaow ja");
+      likeData = null
+      status = `MovieId:${+req.body.movieId} is remove like by userId:${+req.userProfile.id}`
     }
-
-    res.status(201).json({ likeMovieHistory, editLike });
+    console.log(likeData, status)
+    res.status(201).json({ likeMovieHistory, editLike, likeData, status });
   } catch (error) {
     next(error);
   }

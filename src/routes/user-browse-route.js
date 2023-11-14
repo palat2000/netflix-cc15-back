@@ -37,12 +37,21 @@ router.get(
 );
 
 router.get(
+  "/mylist/:movieId",
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getMyListById
+);
+
+router.get(
   "/search/",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
+
 router.patch(
   "/Like",
   authenticateMiddleware,
