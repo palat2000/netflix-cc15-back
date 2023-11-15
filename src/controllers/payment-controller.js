@@ -36,13 +36,13 @@ exports.subscription = async (req, res, next) => {
       },
     });
     if (paymentHistory) {
-      return res.status(304).json({ message: "same session id" });
+      return next(createError("same session", 304));
     }
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
-    await prisma.user.update({
+    const user = await prisma.user.update({
       data: {
         customerId: subscription.customer,
         subscriptionId: subscription.id,
@@ -60,7 +60,12 @@ exports.subscription = async (req, res, next) => {
         userId: req.user.id,
       },
     });
-    res.status(200).json({ message: "OK" });
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+    res.status(200).json({ user, allUserProfile });
   } catch (err) {
     if (err.name === "Error") {
       err.statusCode = 400;

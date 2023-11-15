@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 const createError = require("../utils/create-error");
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
+const { KID } = require("../config/constant");
 
 exports.checkEmail = async (req, res, next) => {
   try {
@@ -61,17 +61,19 @@ exports.register = async (req, res, next) => {
       }
     );
 
-    const kidProfile = await prisma.userProfile.create({
+    await prisma.userProfile.create({
       data: {
         userProfileName: "Kids",
-        favoriteGenres: "KID",
+        favoriteGenres: KID,
         profileImageUrl: null,
         isKid: true,
         userId: +user.id,
       },
     });
 
-    res.status(201).json({ accessToken, user, kidProfile });
+    delete user.password;
+
+    res.status(201).json({ accessToken, user });
   } catch (error) {
     next(error);
   }
@@ -111,14 +113,8 @@ exports.login = async (req, res, next) => {
       }
     );
 
-    const allUserProfile = await prisma.userProfile.findMany({
-      where: {
-        userId: user.id,
-      },
-    });
-
     delete user.password;
-    res.status(200).json({ accessToken, user: {...req.user,allUserProfile} });
+    res.status(200).json({ accessToken, user });
   } catch (error) {
     next(error);
   }
@@ -126,39 +122,8 @@ exports.login = async (req, res, next) => {
 
 exports.getMe = async (req, res) => {
   try {
-  const allUserProfile = await prisma.userProfile.findMany({
-    where: {
-      userId: req.user.id,
-    },
-  });
-  // console.log(allUserProfile)
-  res.status(200).json({ user: {...req.user,allUserProfile} });
-} catch(err) {
-  console.log(err)
-}
-};
-
-exports.chooseProfile = async (req, res, next) => {
-  try {
-    const payload = { userProfileId: req.body.id };
-    const accessToken = jwt.sign(
-      payload,
-      process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
-      {
-        expiresIn: process.env.JWT_EXPIRE,
-      }
-    );
-
-    const userProfile = await prisma.userProfile.findFirst({
-      where: {
-        id: +req.body.id,
-      },
-    });
-
-    res.status(200).json({ accessToken, userProfile });
-    console.log("accessToken",accessToken)
-    console.log("userProfile",userProfile)
-  } catch (error) {
-    next(error);
+    res.status(200).json({ user: req.user });
+  } catch (err) {
+    console.log(err);
   }
 };
