@@ -5,15 +5,15 @@ const createError = require("../utils/create-error");
 
 exports.payment = async (req, res, next) => {
   try {
-    const prices = await stripe.prices.list({
-      lookup_keys: [req.body.lookup_key],
-      expand: ["data.product"],
-    });
+    // const prices = await stripe.prices.list({
+    //   lookup_keys: [req.body.lookup_key],
+    //   expand: ["data.product"],
+    // });
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: "auto",
       line_items: [
         {
-          price: prices.data[0].id,
+          price: req.body.priceId,
           quantity: 1,
         },
       ],
@@ -30,22 +30,19 @@ exports.payment = async (req, res, next) => {
 exports.subscription = async (req, res, next) => {
   try {
     const { sessionId } = req.params;
-    const user = await prisma.user.findUnique({
+    const paymentHistory = await prisma.paymentHistory.findFirst({
       where: {
-        id: req.user.id,
+        transaction: sessionId,
       },
     });
-    if (!user) {
-      return next(createError("user not found", 400));
-    }
-    if (user.isActive) {
-      return res.status(200).json({ message: "still active" });
+    if (paymentHistory) {
+      return next(createError("same session", 304));
     }
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
-    await prisma.user.update({
+    const user = await prisma.user.update({
       data: {
         customerId: subscription.customer,
         subscriptionId: subscription.id,
@@ -63,7 +60,12 @@ exports.subscription = async (req, res, next) => {
         userId: req.user.id,
       },
     });
-    res.status(200).json({ message: "OK" });
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+    res.status(200).json({ user, allUserProfile });
   } catch (err) {
     if (err.name === "Error") {
       err.statusCode = 400;

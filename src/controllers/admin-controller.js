@@ -280,8 +280,24 @@ exports.prepareFile = async (req, res, next) => {
 // };
 exports.readUser = async (req, res, next) => {
   try {
-    const users = await prisma.user.findMany();
-    res.status(200).json(users);
+    const allUserswithPassword = await prisma.user.findMany({
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      orderBy: {
+        activeAt: "desc",
+      },
+      take: 5,
+    });
+
+    const allUsersWithoutPassword = allUserswithPassword.map((user) => {
+      const { password, ...allUsersWithoutPassword } = user;
+      return allUsersWithoutPassword;
+    });
+
+    res.status(200).json(allUsersWithoutPassword);
   } catch (error) {
     console.log(error);
   }

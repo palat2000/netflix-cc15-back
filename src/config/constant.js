@@ -9,7 +9,6 @@ const GENRES = [COMEDIES, ACTION, HORROR, SPORTS, KID, ROMANCE];
 
 module.exports = {
   URL,
-  KID,
   COMEDIES,
   ACTION,
   HORROR,

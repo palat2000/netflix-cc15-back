@@ -18,7 +18,11 @@ router.post(
 );
 
 // router.post("/", adminController.quickAdd);
-router.get("/user", adminController.readUser);
+router.get(
+  "/user",
+  // authenticateAdminMiddleware,
+  adminController.readUser
+);
 
 router.post(
   "/prepare-file", // authenticateMiddleware,

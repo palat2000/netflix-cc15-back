@@ -2,26 +2,55 @@ const prisma = require("../models/prisma");
 const { KID } = require("../config/constant");
 const shuffleArray = require("./shuffle-array");
 
-async function getMovieKids() {
-  const movie = await prisma.movie.findMany({
+async function getMovieKids(profileId) {
+  const data = { top10: [], continueWatching: [], newReleases: [], isKids: [] };
+  const top10 = await prisma.movie.findMany({
     where: {
       enumGenres: KID,
     },
     orderBy: {
-      count_watching: "asc",
+      count_watching: "desc",
+    },
+    take: 10,
+    skip: 0,
+  });
+  const continueWatching = await prisma.history.findMany({
+    where: {
+      userProfileId: profileId,
+    },
+    include: {
+      video: {
+        include: {
+          movie: true,
+        },
+      },
+    },
+    take: 10,
+    skip: 0,
+  });
+  const newReleases = await prisma.movie.findMany({
+    where: {
+      enumGenres: KID,
+    },
+    orderBy: {
+      releaseDateForNetflix: "desc",
+    },
+    take: 10,
+    skip: 0,
+  });
+  const isKids = await prisma.movie.findMany({
+    where: {
+      enumGenres: KID,
     },
   });
-  const data = { row1: [], row2: [], top10: [] };
+  shuffleArray(isKids);
   for (let i = 0; i < 10; i++) {
-    data.top10.push(movie.pop());
+    data.isKids.push(isKids.pop());
   }
-  shuffleArray(fevGenreMovie);
-  for (let i = 0; i < 10; i++) {
-    data.row1.push(movie.pop());
-  }
-  for (let i = 0; i < 10; i++) {
-    data.row2.push(movie.pop());
-  }
+  data.continueWatching = continueWatching;
+  data.top10 = top10;
+  data.newReleases = newReleases;
+
   return data;
 }
 
