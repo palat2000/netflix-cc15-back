@@ -76,12 +76,12 @@ router.post(
 );
 
 router.get(
-  '/getVideo/:videoId',
+  "/getVideo/:videoId",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.getVideoById
-)
+);
 
 router.get(
   '/getNontification',
