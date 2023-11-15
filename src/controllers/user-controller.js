@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
@@ -125,5 +126,51 @@ exports.editUserProfile = async (req, res, next) => {
     if (req?.file?.path) {
       fs.unlink(req?.file?.path);
     }
+  }
+};
+
+exports.chooseProfile = async (req, res, next) => {
+  try {
+    const payload = { userProfileId: req.body.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "qwertyuiopasdfghjkl",
+      {
+        expiresIn: process.env.JWT_PROFILE_EXPIRE,
+      }
+    );
+
+    const userProfile = await prisma.userProfile.findFirst({
+      where: {
+        id: +req.body.id,
+      },
+    });
+
+    res.status(200).json({ accessToken, userProfile });
+    console.log("accessToken", accessToken);
+    console.log("userProfile", userProfile);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAllUserProfile = async (req, res, next) => {
+  try {
+    const allUserProfile = await prisma.userProfile.findMany({
+      where: {
+        userId: +req.user.id,
+      },
+    });
+    res.status(200).json({ allUserProfile });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getMeProfile = async (req, res, next) => {
+  try {
+    res.status(200).json({ userProfile: req.userProfile });
+  } catch (err) {
+    next(err);
   }
 };
