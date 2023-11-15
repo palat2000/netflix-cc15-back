@@ -237,6 +237,18 @@ console.log(req.body.id)
             id: req.body.id
         }
     })
+    const deleteVideo = await prisma.video.delete({
+        where: {
+            movieId: req.body.id
+        }
+    })
+    const deleteActorMovie = await prisma.actorMovie.delete({
+        where: {
+            movieId: req.body.id
+        }
+    })
+
+
     res.status(200).json( deleteMovieList)
   } catch (error) {
     console.log(error)
