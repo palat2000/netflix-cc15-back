@@ -216,11 +216,10 @@ exports.readUser = async (req, res, next) => {
         email: true,
         activeAt: true,
         expiredDate: true,
+        subscriptionId: true,
+        customerId: true,
+        isActive: true,
       },
-      orderBy: {
-        activeAt: "desc",
-      },
-      take: 5,
     });
 
     const allUsersWithoutPassword = allUserswithPassword.map((user) => {
