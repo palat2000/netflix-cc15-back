@@ -34,7 +34,7 @@ router.get(
 router.get(
   "/search/",
   authenticateMiddleware,
-  authenticateProfileMiddleware,
+  // authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
 router.patch(
