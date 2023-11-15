@@ -29,8 +29,11 @@ module.exports = async (req, res, next) => {
     req.userProfile = userProfile;
     next();
   } catch (err) {
-    if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+    if (err.name === "JsonWebTokenError") {
       err.statusCode = 401;
+    }
+    if (err.name === "TokenExpiredError") {
+      err.statusCode = 403;
     }
     next(err);
   }
