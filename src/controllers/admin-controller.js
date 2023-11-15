@@ -212,7 +212,8 @@ if(req.body.tvShow === "YES"){
          detail: req.body.detail,
          isTVShow: !!req.body.tvShow,
          enumGenres: req.body.enumGen,
-         image:imageUrl
+         image:imageUrl,
+         trailer: req.body.trailer
         }
     })
 

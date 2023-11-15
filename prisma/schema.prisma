@@ -104,7 +104,7 @@ model ActorMovie {
   id       Int     @id @default(autoincrement())
   actors   Actors? @relation(fields: [actorsId], references: [id])
   actorsId Int?
-  movie    Movie?  @relation(fields: [movieId], references: [id])
+  movie    Movie?  @relation(fields: [movieId], references: [id], onDelete: Cascade)
   movieId  Int?
 }
 
@@ -113,7 +113,7 @@ model Video {
   videoEpisodeNo   Int       @default(1)
   videoEpisodeName String
   videoUrl         String
-  movie            Movie?    @relation(fields: [movieId], references: [id])
+  movie            Movie?    @relation(fields: [movieId], references: [id], onDelete: Cascade)
   movieId          Int?
   history          History[]
 }
