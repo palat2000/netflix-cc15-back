@@ -302,3 +302,43 @@ exports.readUser = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.getNewestUserAndTopMovie = async (req, res, next) => {
+  try {
+    const newestUser = await prisma.user.findMany({
+      orderBy: {
+        activeAt: "desc",
+      },
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      take: 5,
+    });
+
+    const topMovie = await prisma.movie.findMany({
+      orderBy: {
+        count_watching: "desc",
+      },
+      select: {
+        title: true,
+        release_year: true,
+        count_watching: true,
+        count_liked: true,
+        isTVShow: true,
+        enumGenres: true,
+      },
+      take: 10,
+    });
+
+    const userAndMovie = {
+      newestUser: newestUser,
+      topMovie: topMovie,
+    };
+
+    res.status(200).json(userAndMovie);
+  } catch (error) {
+    console.log(error);
+  }
+};

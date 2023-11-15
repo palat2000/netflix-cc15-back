@@ -17,13 +17,21 @@ router.post(
   adminController.addMovie
 );
 
-// router.post("/", adminController.quickAdd);
 router.get(
   "/user",
   // authenticateAdminMiddleware,
   adminController.readUser
 );
 
+// router.post(
+//   "/",
+//   authenticateMiddleware,
+//   upload.array("file"),
+//   adminController.createMovie
+// );
+
+router.post("/", authenticateMiddleware);
+router.get("/user_movie", adminController.getNewestUserAndTopMovie);
 router.post(
   "/prepare-file", // authenticateMiddleware,
   upload.single("file"),
