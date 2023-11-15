@@ -6,7 +6,6 @@ const createError = require("../utils/create-error");
 const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 const readXLSXFile = require("../services/read-xlsx-file");
-const insertMovie = require("../services/insert-movie");
 const {
   registerSchema,
   loginSchema,
@@ -189,14 +188,6 @@ exports.createMovie = async (req, res, next) => {
     res.status(201).json({ message: "Success" });
   } catch (error) {
     console.log(error);
-    next(error);
-  }
-};
-
-exports.deleteMovie = async (req, res, next) => {
-  try {
-    const { movieId } = req.body;
-  } catch (error) {
     next(error);
   }
 };
