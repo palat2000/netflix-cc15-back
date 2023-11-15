@@ -5,15 +5,17 @@ const authenticateMiddleware = require("../middlewares/authenticate");
 const authenticateAdminMiddleware = require("../middlewares/authenticateAdmin");
 const upload = require("../middlewares/upload");
 
-// router.post(
-//   "/",
-//   authenticateMiddleware,
-//   upload.fields([
-//     { name: "image", maxCount: 1 },
-//     { name: "trailer", maxCount: 1 },
-//   ]),
-//   adminController.createMovie
-// );
+router.post("/login", adminController.login);
+router.post("/reqister", adminController.register);
+
+router.get("/me", authenticateAdminMiddleware, adminController.getMe);
+
+router.post(
+  "/",
+  // authenticateMiddleware,
+  upload.single("file"),
+  adminController.addMovie
+);
 
 // router.post("/", adminController.quickAdd);
 router.get(
@@ -22,13 +24,10 @@ router.get(
   adminController.readUser
 );
 
-// router.post(
-//   "/",
-//   authenticateMiddleware,
-//   upload.array("file"),
-//   adminController.createMovie
-// );
-
-router.post("/", authenticateMiddleware);
+router.post(
+  "/prepare-file", // authenticateMiddleware,
+  upload.single("file"),
+  adminController.prepareFile
+);
 
 module.exports = router;
