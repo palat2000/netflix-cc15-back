@@ -27,7 +27,6 @@ async function insertMovie(arrMovie) {
       (movieData) => movieData.id === createMovie.id
     );
     for (let video of movie.video) {
-      console.log(">>>>>>>>>>", video);
       const createVideo = await prisma.video.create({
         data: {
           videoEpisodeName: video.videoEpisodeName,

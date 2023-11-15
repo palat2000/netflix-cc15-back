@@ -14,7 +14,6 @@ const {
 exports.register = async (req, res, next) => {
   try {
     const { value, error } = registerSchema.validate(req.body);
-    console.log(value, "value hereee");
     if (error) {
       return next(error);
     }
@@ -24,7 +23,6 @@ exports.register = async (req, res, next) => {
       },
     });
 
-    console.log(usernameDup, "usernameDup====");
     if (usernameDup) {
       return next(createError("This username is already used", 400));
     }
@@ -57,7 +55,6 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { value, error } = loginSchema.validate(req.body);
-    console.log(value, "value=====");
     if (error) {
       return next(error);
     }
@@ -67,7 +64,6 @@ exports.login = async (req, res, next) => {
       },
     });
 
-    console.log(admin, "admin ====");
 
     if (!admin) {
       return next(
@@ -104,10 +100,7 @@ exports.getMe = (req, res) => {
 
 exports.createMovie = async (req, res, next) => {
   try {
-    console.log(
-      req.body,
-      "BODYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-    );
+  
     const actorNameArray = req.body.actorName.split(",");
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
@@ -235,7 +228,6 @@ exports.readUser = async (req, res, next) => {
 
 exports.readMovieList = async (req, res, next) => {
   try {
-    console.log("first");
 
     const movie = await prisma.movie.findMany();
     res.status(200).json(movie);
@@ -246,18 +238,12 @@ exports.readMovieList = async (req, res, next) => {
 
 exports.editMovieList = async (req, res, next) => {
   try {
-    console.log("req.body naja ", req.body);
-    console.log("filllllleeeee", req.file);
 
     let imageUrl;
     if (req?.file?.path) {
       imageUrl = await upload(req.file.path);
-      // body.profileImageUrl = imageUrl;
     }
-    console.log(imageUrl);
-    // if ( req.body.enumGen === "null"){
-    //   req.body.enumGen = req.body.subEnumGen
-    // }
+  
     if (req.body.tvShow === "NO") {
       req.body.tvShow = false;
     }
@@ -281,11 +267,9 @@ exports.editMovieList = async (req, res, next) => {
     });
 
     res.status(200).json(editMovie);
-    console.log("resultttttttttttttttttttttttttttttt", editMovie);
   } catch (error) {
     console.log(error);
   } finally {
-    // console.log("req", req);
     if (req?.file?.path) {
       fs.unlink(req?.file?.path);
     }
@@ -293,7 +277,6 @@ exports.editMovieList = async (req, res, next) => {
 };
 exports.deleteMovieList = async (req, res, next) => {
   try {
-    console.log(req.body.id);
 
     const deleteMovieList = await prisma.movie.delete({
       where: {

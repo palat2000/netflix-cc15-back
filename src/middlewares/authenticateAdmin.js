@@ -4,8 +4,6 @@ const prisma = require("../models/prisma");
 
 module.exports = async (req, res, next) => {
   try {
-    console.log("authenAdmin Back");
-    console.log(req.headers);
     const authorization = req.headers.authorization;
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return next(createError("unauthenticated", 401));
