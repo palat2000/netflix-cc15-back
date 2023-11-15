@@ -25,6 +25,7 @@ exports.getMovie = async (req, res, next) => {
 
 exports.getMovieById = async (req, res, next) => {
   const movieId = +req.params.movieId;
+  // console.log(req.userProfile.id)
   try {
     const movie = await prisma.movie.findMany({
       where: {
@@ -47,7 +48,7 @@ exports.getMovieById = async (req, res, next) => {
             },
           },
         },
-        video: {},
+        video: true,
       },
     });
 
@@ -92,10 +93,14 @@ exports.getMovieById = async (req, res, next) => {
       if (el.myList.length === 0) el.myList = null;
       return el;
     });
-    console.log(
-      "🚀 ~ file: user-browse-controller.js:91 ~ exports.getMovieById= ~ moreLikeThisData:",
-      moreLikeThisData
-    );
+
+    const recentWatchingHistory = await prisma.history.findMany({
+      where: {
+        userProfileId: req.userProfile.id
+      },
+    })
+    console.log("🚀 ~ file: user-browse-controller.js:102 ~ exports.getMovieById= ~ recentWatchingHistory:", recentWatchingHistory)
+
 
     res.status(200).json({
       movie: { ...movie, likeHistory, inMyListHistory },
