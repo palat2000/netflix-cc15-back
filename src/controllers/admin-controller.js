@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const XLSX = require("xlsx");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
@@ -5,23 +7,109 @@ const { upload } = require("../utils/cloudinary-service");
 const fs = require("fs/promises");
 const readXLSXFile = require("../services/read-xlsx-file");
 const insertMovie = require("../services/insert-movie");
-// const {
-//   registerSchema,
-//   loginSchema,
-// } = require("../validators/admin-validator");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../validators/admin-validator");
+
+exports.register = async (req, res, next) => {
+  try {
+    const { value, error } = registerSchema.validate(req.body);
+    console.log(value, "value hereee");
+    if (error) {
+      return next(error);
+    }
+    const usernameDup = await prisma.admin.findFirst({
+      where: {
+        username: value.username,
+      },
+    });
+
+    console.log(usernameDup, "usernameDup====");
+    if (usernameDup) {
+      return next(createError("This username is already used", 400));
+    }
+
+    value.password = await bcrypt.hash(value.password, 12);
+
+    const admin = await prisma.admin.create({
+      data: {
+        username: value.username,
+        password: value.password,
+        createAt: new Date(),
+      },
+    });
+
+    const payload = { adminId: admin.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "HFTAFH",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+
+    res.status(201).json({ accessToken, admin });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.login = async (req, res, next) => {
-  // try {
-  //   const { value, error } = loginSchema.validate;
-  // } catch (error) {
-  //   next(error);
-  // }
+  try {
+    const { value, error } = loginSchema.validate(req.body);
+    console.log(value, "value=====");
+    if (error) {
+      return next(error);
+    }
+    const admin = await prisma.admin.findFirst({
+      where: {
+        username: value.username,
+      },
+    });
+
+    console.log(admin, "admin ====");
+
+    if (!admin) {
+      return next(
+        createError(
+          "Sorry, we can't find an account with this username. Please try again. ",
+          400
+        )
+      );
+    }
+
+    const isMatch = await bcrypt.compare(value.password, admin.password);
+    if (!isMatch) {
+      return next(createError("Incorrect password. Please try again. ", 400));
+    }
+
+    const payload = { adminId: admin.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "HFTAFH",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+    delete admin.password;
+    res.status(200).json({ accessToken, admin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getMe = (req, res) => {
+  res.status(200).json({ admin: req.admin });
 };
 
 exports.createMovie = async (req, res, next) => {
   try {
-    console.log(req.body,"BODYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-    const actorNameArray = req.body.actorName.split(',')
+    console.log(
+      req.body,
+      "BODYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+    );
+    const actorNameArray = req.body.actorName.split(",");
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
         title: req.body.title,
@@ -32,8 +120,8 @@ exports.createMovie = async (req, res, next) => {
       return next(createError("Already add this movie name", 400));
     }
 
-    const Genres = req.body.genres.toUpperCase()
-    
+    const Genres = req.body.genres.toUpperCase();
+
     const movie = await prisma.movie.create({
       data: {
         title: req.body.title.toLowerCase(),
@@ -43,51 +131,45 @@ exports.createMovie = async (req, res, next) => {
         image: req.body.coverImage,
         enumGenres: Genres,
         trailer: req.body.trailer,
-        releaseDateForNetflix:new Date(req.body.releaseDateForNetflix)
-        
-
-      }
-    })
-
-
+        releaseDateForNetflix: new Date(req.body.releaseDateForNetflix),
+      },
+    });
 
     actorNameArray.forEach(async (e) => {
       const checkActors = await prisma.actors.findFirst({
         where: {
-          name: e.toLowerCase()
-        }
-      })
+          name: e.toLowerCase(),
+        },
+      });
 
       if (!checkActors) {
         const actorIdcheck = await prisma.actors.create({
-          data: { name: e.toLowerCase() }
-        })
+          data: { name: e.toLowerCase() },
+        });
         if (actorIdcheck) {
           await prisma.actorMovie.create({
             data: {
               actorsId: actorIdcheck.id,
-              movieId: movie.id
-            }
-          })
+              movieId: movie.id,
+            },
+          });
         }
-
       }
       if (checkActors) {
         await prisma.actorMovie.create({
           data: {
             actorsId: checkActors.id,
-            movieId: movie.id
-          }
-        })
+            movieId: movie.id,
+          },
+        });
       }
-    })
-
+    });
 
     const episodeDup = await prisma.video.findFirst({
       where: {
         videoEpisodeName: req.body.videoEpisodeName.toLowerCase(),
         videoUrl: req.body.video,
-        videoEpisodeNo: +req.body.videoEpisodeNo
+        videoEpisodeNo: +req.body.videoEpisodeNo,
       },
     });
 
@@ -100,47 +182,22 @@ exports.createMovie = async (req, res, next) => {
         videoEpisodeName: req.body.videoEpisodeName.toLowerCase(),
         videoUrl: req.body.video,
         videoEpisodeNo: +req.body.videoEpisodeNo,
-        movieId: movie.id
-      }
-    })
+        movieId: movie.id,
+      },
+    });
 
-
-
-
-    
-
-    res.status(201).json({message:"Success"});
+    res.status(201).json({ message: "Success" });
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
-
-
 exports.deleteMovie = async (req, res, next) => {
   try {
     const { movieId } = req.body;
   } catch (error) {
     next(error);
-  }
-};
-
-exports.addMovie = async (req, res, next) => {
-  try {
-    const file = XLSX.readFile(req.file.path);
-    const sheetNames = file.SheetNames;
-    const worksheet = file.Sheets[sheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(worksheet);
-    const formattedData = readXLSXFile(data);
-    const movies = await insertMovie(formattedData);
-    res.json({ movies });
-  } catch (err) {
-    next(err);
-  } finally {
-    if (req.file) {
-      fs.unlink(req.file.path);
-    }
   }
 };
 
@@ -161,13 +218,67 @@ exports.prepareFile = async (req, res, next) => {
   }
 };
 
-
 exports.readUser = async (req, res, next) => {
   try {
-    
-    const users = await prisma.user.findMany()
-    res.status(200).json( users)
+    const allUserswithPassword = await prisma.user.findMany({
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      orderBy: {
+        activeAt: "desc",
+      },
+      take: 5,
+    });
+
+    const allUsersWithoutPassword = allUserswithPassword.map((user) => {
+      const { password, ...allUsersWithoutPassword } = user;
+      return allUsersWithoutPassword;
+    });
+
+    res.status(200).json(allUsersWithoutPassword);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};
+
+exports.getNewestUserAndTopMovie = async (req, res, next) => {
+  try {
+    const newestUser = await prisma.user.findMany({
+      orderBy: {
+        activeAt: "desc",
+      },
+      select: {
+        email: true,
+        activeAt: true,
+        expiredDate: true,
+      },
+      take: 5,
+    });
+
+    const topMovie = await prisma.movie.findMany({
+      orderBy: {
+        count_watching: "desc",
+      },
+      select: {
+        title: true,
+        release_year: true,
+        count_watching: true,
+        count_liked: true,
+        isTVShow: true,
+        enumGenres: true,
+      },
+      take: 10,
+    });
+
+    const userAndMovie = {
+      newestUser: newestUser,
+      topMovie: topMovie,
+    };
+
+    res.status(200).json(userAndMovie);
+  } catch (error) {
+    console.log(error);
+  }
+};
