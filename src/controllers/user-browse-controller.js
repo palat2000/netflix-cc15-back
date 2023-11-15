@@ -98,12 +98,24 @@ exports.getMovieById = async (req, res, next) => {
       where: {
         userProfileId: req.userProfile.id
       },
+      include: {
+        video: {
+          select: {
+            movieId: true
+          }
+        }
+      },
+      orderBy: {
+        latestWatchingAt: "desc"
+      }
     })
     console.log("🚀 ~ file: user-browse-controller.js:102 ~ exports.getMovieById= ~ recentWatchingHistory:", recentWatchingHistory)
 
+    const historyWatchingEpisode = recentWatchingHistory.filter(el => el.video.movieId === movieId)
+    const recentWatchingEpisode = historyWatchingEpisode[0]
 
     res.status(200).json({
-      movie: { ...movie, likeHistory, inMyListHistory },
+      movie: { ...movie, likeHistory, inMyListHistory, recentWatchingEpisode },
       moreLikeThisData,
     });
   } catch (err) {
