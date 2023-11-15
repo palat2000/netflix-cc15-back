@@ -190,10 +190,15 @@ let imageUrl
         // body.profileImageUrl = imageUrl;
       }
       console.log(imageUrl)
-    if ( req.body.enumGen === "null"){
-      req.body.enumGen = req.body.subEnumGen
-    }
-
+    // if ( req.body.enumGen === "null"){
+    //   req.body.enumGen = req.body.subEnumGen
+    // }
+if(req.body.tvShow === "NO"){
+  req.body.tvShow = false
+}
+if(req.body.tvShow === "YES"){
+  req.body.tvShow = true
+}
     const editMovie = await prisma.movie.update({
 
         where: {
