@@ -5,13 +5,16 @@ const prisma = require("../models/prisma");
 exports.getMovie = async (req, res, next) => {
   try {
     const isTVShow = req.query.isTVShow;
-    console.log("🚀 ~ file: user-browse-controller.js:8 ~ exports.getMovie= ~ isTVShow:", isTVShow)
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:8 ~ exports.getMovie= ~ isTVShow:",
+      isTVShow
+    );
     let movies;
     if (req.userProfile.isKid) {
       movies = await getMovieKids(req.userProfile.id);
     } else {
       if (isTVShow === undefined) {
-        movies = await getMovie(20);
+        movies = await getMovie(req.userProfile.id);
       } else {
         const isTVShowBoolean = Boolean(+isTVShow);
         movies = await getMovie(req.userProfile.id, isTVShowBoolean);
@@ -557,20 +560,26 @@ exports.getVideoById = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 exports.getNontification = async (req, res, next) => {
   try {
-    const currentDatetime = new Date()
-    console.log("🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:", currentDatetime)
-    console.log("🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:", currentDatetime.toLocaleDateString())
-    const expireDateTime = req.user.expiredDate
+    const currentDatetime = new Date();
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:",
+      currentDatetime
+    );
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:",
+      currentDatetime.toLocaleDateString()
+    );
+    const expireDateTime = req.user.expiredDate;
     const timeDifference = expireDateTime - currentDatetime;
     const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
 
-    let expireAlert = { subscriptExpireIn7Days: null }
+    let expireAlert = { subscriptExpireIn7Days: null };
     if (daysDifference < 7) {
-      expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString()
+      expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString();
     }
 
     const newMovieIn7days = prisma.movie.findMany({
@@ -578,13 +587,12 @@ exports.getNontification = async (req, res, next) => {
         releaseDateForNetflix: {
           lte: new Date(),
           gte: currentDatetime,
-        }
-      }
-    })
+        },
+      },
+    });
 
-
-    res.status(200).json({ ...expireAlert })
+    res.status(200).json({ ...expireAlert });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
