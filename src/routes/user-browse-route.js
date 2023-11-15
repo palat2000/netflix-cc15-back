@@ -83,4 +83,11 @@ router.get(
   userBrowseController.getVideoById
 )
 
+router.get(
+  '/getNontification',
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  userBrowseController.getNontification
+)
+
 module.exports = router;
