@@ -66,11 +66,34 @@ exports.subscription = async (req, res, next) => {
         userId: user.id,
       },
     });
+    delete user.password;
     res.status(200).json({ user, allUserProfile });
   } catch (err) {
     if (err.name === "Error") {
       err.statusCode = 400;
     }
+    next(err);
+  }
+};
+
+exports.cancelSubscription = async (req, res, next) => {
+  try {
+    const findUser = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
+    await stripe.subscriptions.cancel(findUser.subscriptionId);
+    const user = await prisma.user.update({
+      data: {
+        subscriptionId: null,
+      },
+      where: {
+        id: findUser.id,
+      },
+    });
+    res.status(200).json({ user });
+  } catch (err) {
     next(err);
   }
 };

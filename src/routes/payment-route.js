@@ -13,5 +13,10 @@ router.post(
   authenticateMiddleware,
   paymentController.subscription
 );
+router.patch(
+  "/cancel-subscription",
+  authenticateMiddleware,
+  paymentController.cancelSubscription
+);
 
 module.exports = router;
