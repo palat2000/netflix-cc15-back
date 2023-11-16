@@ -84,10 +84,10 @@ router.get(
 );
 
 router.get(
-  '/getNontification',
+  "/getNotification",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
-  userBrowseController.getNontification
-)
+  userBrowseController.getNotification
+);
 
 module.exports = router;
