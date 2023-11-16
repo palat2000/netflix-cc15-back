@@ -48,7 +48,7 @@ exports.subscription = async (req, res, next) => {
         subscriptionId: subscription.id,
         isActive: true,
         expiredDate: new Date(subscription.current_period_end * 1000),
-        activeAt: new DataTransfer(subscription.start_date * 1000),
+        activeAt: new Date(subscription.start_date * 1000),
       },
       where: {
         id: req.user.id,
