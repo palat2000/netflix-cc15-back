@@ -28,7 +28,7 @@ exports.getMovie = async (req, res, next) => {
 
 exports.getMovieById = async (req, res, next) => {
   const movieId = +req.params.movieId;
-  // console.log(req.userProfile.id)
+  console.log("req.userProfile.id", req.userProfile.id)
   try {
     const movie = await prisma.movie.findMany({
       where: {
@@ -104,23 +104,35 @@ exports.getMovieById = async (req, res, next) => {
       include: {
         video: {
           select: {
-            movieId: true
+            movieId: true,
+            videoEpisodeNo: true
           }
         }
       },
-      orderBy: {
-        latestWatchingAt: "desc"
-      }
+      orderBy: [
+        {
+          video: {
+            videoEpisodeNo: "desc"
+          },
+        },
+        { latestWatchingAt: "desc" }
+      ]
     })
     console.log("🚀 ~ file: user-browse-controller.js:102 ~ exports.getMovieById= ~ recentWatchingHistory:", recentWatchingHistory)
 
     const historyWatchingEpisode = recentWatchingHistory.filter(el => el.video.movieId === movieId)
+    console.log("🚀 ~ file: user-browse-controller.js:118 ~ exports.getMovieById= ~ historyWatchingEpisode:", historyWatchingEpisode)
     const recentWatchingEpisode = historyWatchingEpisode[0]
+    console.log("🚀 ~ file: user-browse-controller.js:120 ~ exports.getMovieById= ~ recentWatchingEpisode:", recentWatchingEpisode)
 
-    res.status(200).json({
+    const resData = {
       movie: { ...movie, likeHistory, inMyListHistory, recentWatchingEpisode },
       moreLikeThisData,
-    });
+    }
+
+    // console.log("🚀 ~ file: user-browse-controller.js:124 ~ exports.getMovieById= ~ resData:", resData)
+
+    res.status(200).json(resData);
   } catch (err) {
     next(err);
   }
