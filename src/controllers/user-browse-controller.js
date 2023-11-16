@@ -566,6 +566,7 @@ exports.getNotification = async (req, res, next) => {
     const expireDateTime = req.user.expiredDate;
     const timeDifference = expireDateTime - currentDatetime;
     const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+    const sevenDaysAgo = currentDatetime - 7 * 24 * 60 * 60 * 1000;
 
     let expireAlert = { subscriptExpireIn7Days: null };
     if (daysDifference < 7) {
@@ -576,12 +577,10 @@ exports.getNotification = async (req, res, next) => {
       where: {
         releaseDateForNetflix: {
           lte: new Date(),
-          gte: currentDatetime,
+          gte: new Date(sevenDaysAgo),
         },
       },
     });
-
-    console.log(newMovieIn7days);
 
     res.status(200).json({ ...expireAlert, newMovieIn7days });
   } catch (err) {
