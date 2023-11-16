@@ -10,7 +10,7 @@ exports.getMovie = async (req, res, next) => {
       movies = await getMovieKids(req.userProfile.id);
     } else {
       if (isTVShow === undefined) {
-        movies = await getMovie(20);
+        movies = await getMovie(req.userProfile.id);
       } else {
         const isTVShowBoolean = Boolean(+isTVShow);
         movies = await getMovie(req.userProfile.id, isTVShowBoolean);
@@ -24,6 +24,7 @@ exports.getMovie = async (req, res, next) => {
 
 exports.getMovieById = async (req, res, next) => {
   const movieId = +req.params.movieId;
+  console.log("req.userProfile.id", req.userProfile.id);
   try {
     const movie = await prisma.movie.findMany({
       where: {
@@ -46,7 +47,7 @@ exports.getMovieById = async (req, res, next) => {
             },
           },
         },
-        video: {},
+        video: true,
       },
     });
 
@@ -90,12 +91,46 @@ exports.getMovieById = async (req, res, next) => {
       if (el.myList.length === 0) el.myList = null;
       return el;
     });
-   
 
-    res.status(200).json({
-      movie: { ...movie, likeHistory, inMyListHistory },
-      moreLikeThisData,
+    const recentWatchingHistory = await prisma.history.findMany({
+      where: {
+        userProfileId: req.userProfile.id,
+      },
+      include: {
+        video: {
+          select: {
+            movieId: true,
+            videoEpisodeNo: true,
+          },
+        },
+      },
+      orderBy: [
+        {
+          video: {
+            videoEpisodeNo: "desc",
+          },
+        },
+        { latestWatchingAt: "desc" },
+      ],
     });
+
+    const historyWatchingEpisode = recentWatchingHistory.filter(
+      (el) => el.video.movieId === movieId
+    );
+
+    const firstEpisode = movie[0]?.video?.filter(
+      (el) => el.videoEpisodeNo === 1
+    )[0];
+    const recentWatchingEpisode = {
+      videoId: historyWatchingEpisode[0]?.videoId || firstEpisode?.id,
+    };
+
+    const resData = {
+      movie: { ...movie, likeHistory, inMyListHistory, recentWatchingEpisode },
+      moreLikeThisData,
+    };
+
+    res.status(200).json(resData);
   } catch (err) {
     next(err);
   }
@@ -103,14 +138,12 @@ exports.getMovieById = async (req, res, next) => {
 
 exports.editMyList = async (req, res, next) => {
   try {
-
     const findMyList = await prisma.myList.findFirst({
       where: {
         movieId: +req.body.movieId,
         userProfileId: +req.userProfile.id,
       },
     });
-  
 
     let likeAndUnLikeList = null;
     let myList = null;
@@ -122,7 +155,7 @@ exports.editMyList = async (req, res, next) => {
           id: +findMyList.id,
         },
       });
-   
+
       status = `remove movieId:${+req.body.movieId} from MyList`;
     } else {
       likeAndUnLikeList = await prisma.myList.create({
@@ -185,8 +218,6 @@ exports.searchBar = async (req, res, next) => {
     const searchTerm = req.query.q;
     const genre = req.query.genre;
     const isTVShow = req.query.isTVShow;
-
-
 
     if (searchTerm) {
       const searchMovieBytitle = await prisma.movie.findMany({
@@ -415,7 +446,6 @@ exports.startWatching = async (req, res, next) => {
       ORDER BY genreCount DESC
       LIMIT 1;
     `;
-    
 
       const editFavoriteGenres = await prisma.userProfile.update({
         where: {
@@ -520,18 +550,26 @@ exports.getVideoById = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 exports.getNontification = async (req, res, next) => {
   try {
-    const currentDatetime = new Date()
-    const expireDateTime = req.user.expiredDate
+    const currentDatetime = new Date();
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:",
+      currentDatetime
+    );
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:547 ~ exports.getNontification= ~ currentDatetime:",
+      currentDatetime.toLocaleDateString()
+    );
+    const expireDateTime = req.user.expiredDate;
     const timeDifference = expireDateTime - currentDatetime;
     const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
 
-    let expireAlert = { subscriptExpireIn7Days: null }
+    let expireAlert = { subscriptExpireIn7Days: null };
     if (daysDifference < 7) {
-      expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString()
+      expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString();
     }
 
     const newMovieIn7days = prisma.movie.findMany({
@@ -539,13 +577,12 @@ exports.getNontification = async (req, res, next) => {
         releaseDateForNetflix: {
           lte: new Date(),
           gte: currentDatetime,
-        }
-      }
-    })
+        },
+      },
+    });
 
-
-    res.status(200).json({ ...expireAlert })
+    res.status(200).json({ ...expireAlert });
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};

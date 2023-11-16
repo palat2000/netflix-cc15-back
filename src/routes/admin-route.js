@@ -19,7 +19,7 @@ router.get(
   // authenticateAdminMiddleware,
   adminController.readUser
 );
-router.post("/upload", adminController.createMovie);
+router.post("/upload",  upload.single("file"),adminController.createMovie);
 router.get("/user_movie", adminController.getNewestUserAndTopMovie);
 router.post(
   "/prepare-file",

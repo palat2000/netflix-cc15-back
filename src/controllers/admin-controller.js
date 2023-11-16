@@ -64,7 +64,6 @@ exports.login = async (req, res, next) => {
       },
     });
 
-
     if (!admin) {
       return next(
         createError(
@@ -100,7 +99,6 @@ exports.getMe = (req, res) => {
 
 exports.createMovie = async (req, res, next) => {
   try {
-  
     const actorNameArray = req.body.actorName.split(",");
     const titleMovieDup = await prisma.movie.findFirst({
       where: {
@@ -228,8 +226,11 @@ exports.readUser = async (req, res, next) => {
 
 exports.readMovieList = async (req, res, next) => {
   try {
-
-    const movie = await prisma.movie.findMany();
+    const movie = await prisma.movie.findMany({
+      orderBy: {
+        id: "desc",
+      },
+    });
     res.status(200).json(movie);
   } catch (error) {
     console.log(error);
@@ -238,12 +239,11 @@ exports.readMovieList = async (req, res, next) => {
 
 exports.editMovieList = async (req, res, next) => {
   try {
-
     let imageUrl;
     if (req?.file?.path) {
       imageUrl = await upload(req.file.path);
     }
-  
+
     if (req.body.tvShow === "NO") {
       req.body.tvShow = false;
     }
@@ -265,7 +265,6 @@ exports.editMovieList = async (req, res, next) => {
         image: imageUrl,
       },
     });
-
     res.status(200).json(editMovie);
   } catch (error) {
     console.log(error);
@@ -277,12 +276,22 @@ exports.editMovieList = async (req, res, next) => {
 };
 exports.deleteMovieList = async (req, res, next) => {
   try {
-
     const deleteMovieList = await prisma.movie.delete({
       where: {
         id: req.body.id,
       },
     });
+    const deleteVideo = await prisma.video.delete({
+      where: {
+        movieId: req.body.id,
+      },
+    });
+    const deleteActorMovie = await prisma.actorMovie.delete({
+      where: {
+        movieId: req.body.id,
+      },
+    });
+
     res.status(200).json(deleteMovieList);
   } catch (error) {
     console.log(error);
