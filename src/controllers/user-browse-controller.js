@@ -118,19 +118,16 @@ exports.getMovieById = async (req, res, next) => {
         { latestWatchingAt: "desc" }
       ]
     })
-    console.log("🚀 ~ file: user-browse-controller.js:102 ~ exports.getMovieById= ~ recentWatchingHistory:", recentWatchingHistory)
 
     const historyWatchingEpisode = recentWatchingHistory.filter(el => el.video.movieId === movieId)
-    console.log("🚀 ~ file: user-browse-controller.js:118 ~ exports.getMovieById= ~ historyWatchingEpisode:", historyWatchingEpisode)
-    const recentWatchingEpisode = historyWatchingEpisode[0]
-    console.log("🚀 ~ file: user-browse-controller.js:120 ~ exports.getMovieById= ~ recentWatchingEpisode:", recentWatchingEpisode)
+
+    const firstEpisode = movie[0]?.video?.filter(el => el.videoEpisodeNo === 1)[0]
+    const recentWatchingEpisode = { videoId: historyWatchingEpisode[0]?.videoId || firstEpisode?.id }
 
     const resData = {
       movie: { ...movie, likeHistory, inMyListHistory, recentWatchingEpisode },
       moreLikeThisData,
     }
-
-    // console.log("🚀 ~ file: user-browse-controller.js:124 ~ exports.getMovieById= ~ resData:", resData)
 
     res.status(200).json(resData);
   } catch (err) {
