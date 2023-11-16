@@ -235,13 +235,10 @@ exports.readUser = async (req, res, next) => {
 
 exports.readMovieList = async (req, res, next) => {
   try {
-
     const movie = await prisma.movie.findMany({
-      orderBy:
-        {
-          id:'desc'
-        }
-      
+      orderBy: {
+        id: "desc",
+      },
     });
     res.status(200).json(movie);
   } catch (error) {
@@ -284,7 +281,6 @@ exports.editMovieList = async (req, res, next) => {
         image: imageUrl,
       },
     });
-
     res.status(200).json(editMovie);
     console.log("resultttttttttttttttttttttttttttttt", editMovie);
   } catch (error) {
@@ -305,6 +301,17 @@ exports.deleteMovieList = async (req, res, next) => {
         id: req.body.id,
       },
     });
+    const deleteVideo = await prisma.video.delete({
+      where: {
+        movieId: req.body.id,
+      },
+    });
+    const deleteActorMovie = await prisma.actorMovie.delete({
+      where: {
+        movieId: req.body.id,
+      },
+    });
+
     res.status(200).json(deleteMovieList);
   } catch (error) {
     console.log(error);
