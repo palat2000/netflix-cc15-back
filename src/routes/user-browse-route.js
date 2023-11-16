@@ -37,12 +37,21 @@ router.get(
 );
 
 router.get(
+  "/mylist/:movieId",
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getMyListById
+);
+
+router.get(
   "/search/",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
   authenticateProfileMiddleware,
   userBrowseController.searchBar
 );
+
 router.patch(
   "/Like",
   authenticateMiddleware,
@@ -65,5 +74,20 @@ router.post(
   authenticateProfileMiddleware,
   userBrowseController.endWatching
 );
+
+router.get(
+  "/getVideo/:videoId",
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getVideoById
+);
+
+router.get(
+  '/getNontification',
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  userBrowseController.getNontification
+)
 
 module.exports = router;

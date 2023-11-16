@@ -5,10 +5,6 @@ const createError = require("../utils/create-error");
 
 exports.payment = async (req, res, next) => {
   try {
-    // const prices = await stripe.prices.list({
-    //   lookup_keys: [req.body.lookup_key],
-    //   expand: ["data.product"],
-    // });
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: "auto",
       line_items: [
@@ -42,12 +38,21 @@ exports.subscription = async (req, res, next) => {
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
+    await stripe.paymentMethods.attach(subscription.default_payment_method, {
+      customer: subscription.customer,
+    });
+    await stripe.customers.update(subscription.customer, {
+      invoice_settings: {
+        default_payment_method: subscription.default_payment_method,
+      },
+    });
     const user = await prisma.user.update({
       data: {
         customerId: subscription.customer,
         subscriptionId: subscription.id,
         isActive: true,
         expiredDate: new Date(subscription.current_period_end * 1000),
+        activeAt: new Date(subscription.start_date * 1000),
       },
       where: {
         id: req.user.id,
@@ -57,7 +62,7 @@ exports.subscription = async (req, res, next) => {
       data: {
         paymentDate: new Date(),
         transaction: session.id,
-        userId: req.user.id,
+        userId: user.id,
       },
     });
     const allUserProfile = await prisma.userProfile.findMany({
@@ -65,6 +70,7 @@ exports.subscription = async (req, res, next) => {
         userId: user.id,
       },
     });
+    delete user.password;
     res.status(200).json({ user, allUserProfile });
   } catch (err) {
     if (err.name === "Error") {
@@ -74,20 +80,63 @@ exports.subscription = async (req, res, next) => {
   }
 };
 
-// exports.createPortalSession = async (req, res, next) => {
-//   // For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-//   // Typically this is stored alongside the authenticated user in your database.
-//   const { session_id } = req.body;
-//   const checkoutSession = await stripe.checkout.sessions.retrieve(session_id);
+exports.cancelSubscription = async (req, res, next) => {
+  try {
+    await stripe.subscriptions.cancel(req.user.subscriptionId);
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        isActive: false,
+      },
+    });
+    delete user.password;
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
 
-//   // This is the url to which the customer will be redirected when they are done
-//   // managing their billing with the portal.
-//   const returnUrl = YOUR_DOMAIN;
+exports.resumeSubscription = async (req, res, next) => {
+  try {
+    await stripe.subscriptions.resume(req.user.subscriptionId, {
+      billing_cycle_anchor: "now",
+    });
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        isActive: true,
+      },
+    });
+    delete user.password;
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
 
-//   const portalSession = await stripe.billingPortal.sessions.create({
-//     customer: checkoutSession.customer,
-//     return_url: returnUrl,
-//   });
-
-//   res.redirect(303, portalSession.url);
-// };
+exports.restartSubscription = async (req, res, next) => {
+  try {
+    const subscription = await stripe.subscriptions.create({
+      customer: req.user.customerId,
+      billing_cycle_anchor: new Date(req.user.expiredDate),
+      items: [{ price: req.body.priceId }],
+    });
+    const user = await prisma.user.update({
+      data: {
+        isActive: true,
+        subscriptionId: subscription.id,
+      },
+      where: {
+        id: req.user.id,
+      },
+    });
+    delete user.password;
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -13,5 +13,20 @@ router.post(
   authenticateMiddleware,
   paymentController.subscription
 );
+router.patch(
+  "/cancel-subscription",
+  authenticateMiddleware,
+  paymentController.cancelSubscription
+);
+router.patch(
+  "/resume-subscription",
+  authenticateMiddleware,
+  paymentController.resumeSubscription
+);
+router.post(
+  "/create-subscription",
+  authenticateMiddleware,
+  paymentController.restartSubscription
+);
 
 module.exports = router;

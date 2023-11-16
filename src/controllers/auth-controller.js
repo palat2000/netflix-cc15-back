@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const stripe = require("stripe")(process.env.STRIPE_API_TEST_KEY);
 const createError = require("../utils/create-error");
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
+const { KID } = require("../config/constant");
 
 exports.checkEmail = async (req, res, next) => {
   try {
@@ -64,7 +64,7 @@ exports.register = async (req, res, next) => {
     await prisma.userProfile.create({
       data: {
         userProfileName: "Kids",
-        favoriteGenres: "KID",
+        favoriteGenres: KID,
         profileImageUrl: null,
         isKid: true,
         userId: +user.id,
