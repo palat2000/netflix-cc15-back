@@ -5,17 +5,13 @@ const prisma = require("../models/prisma");
 module.exports = async (req, res, next) => {
   try {
     const authorization = req.headers.authorizationprofile;
-    console.log(
-      "🚀 ~ file: authenticateProfile.js:8 ~ module.exports= ~ authorization:",
-      authorization
-    );
+
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return next(createError("unauthenticated", 401));
     }
 
     const token = authorization.split(" ")[1];
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || "mnbvcxz");
-    console.log(payload);
 
     const userProfile = await prisma.userProfile.findUnique({
       where: {

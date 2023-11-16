@@ -7,7 +7,6 @@ const fs = require("fs/promises");
 exports.createUserProfile = async (req, res, next) => {
   try {
     const { userProfileName, isKid, userId } = req.body;
-    console.log("isKid", isKid);
     const userProfileNameDup = await prisma.userProfile.findFirst({
       where: {
         userId: +userId,
@@ -20,8 +19,6 @@ exports.createUserProfile = async (req, res, next) => {
     }
     if (isKid === "true") favoriteGenres = "KID";
 
-    console.log(!isKid, "sssssssssssssssssssssssssss");
-    console.log(favoriteGenres, "sssssssssssssssssssssssssss");
     const body = {
       userProfileName: userProfileName,
       favoriteGenres: favoriteGenres,
@@ -40,11 +37,9 @@ exports.createUserProfile = async (req, res, next) => {
     });
 
     res.status(201).json({ message: "userProfile created", userProfile });
-    console.log(userProfile);
   } catch (error) {
     next(error);
   } finally {
-    // console.log("req", req);
     if (req?.file?.path) {
       fs.unlink(req?.file?.path);
     }
@@ -68,10 +63,7 @@ exports.deleteUserProfile = async (req, res, next) => {
 
 exports.editUserProfile = async (req, res, next) => {
   try {
-    console.log(
-      req.file,
-      "req.fileeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    );
+ 
     const { userProfileName, userProfileId } = req.body;
     if (!userProfileName) {
       return next(createError("userProfileName is required", 400));
@@ -147,8 +139,6 @@ exports.chooseProfile = async (req, res, next) => {
     });
 
     res.status(200).json({ accessToken, userProfile });
-    console.log("accessToken", accessToken);
-    console.log("userProfile", userProfile);
   } catch (error) {
     next(error);
   }
