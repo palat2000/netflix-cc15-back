@@ -574,7 +574,7 @@ exports.getVideoById = async (req, res, next) => {
   }
 };
 
-exports.getNontification = async (req, res, next) => {
+exports.getNotification = async (req, res, next) => {
   try {
     const currentDatetime = new Date();
     console.log(
@@ -588,22 +588,23 @@ exports.getNontification = async (req, res, next) => {
     const expireDateTime = req.user.expiredDate;
     const timeDifference = expireDateTime - currentDatetime;
     const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+    const sevenDaysAgo = currentDatetime - 7 * 24 * 60 * 60 * 1000;
 
     let expireAlert = { subscriptExpireIn7Days: null };
     if (daysDifference < 7) {
       expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString();
     }
 
-    const newMovieIn7days = prisma.movie.findMany({
+    const newMovieIn7days = await prisma.movie.findMany({
       where: {
         releaseDateForNetflix: {
           lte: new Date(),
-          gte: currentDatetime,
+          gte: new Date(sevenDaysAgo),
         },
       },
     });
 
-    res.status(200).json({ ...expireAlert });
+    res.status(200).json({ ...expireAlert, newMovieIn7days });
   } catch (err) {
     next(err);
   }

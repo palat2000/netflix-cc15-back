@@ -84,11 +84,11 @@ router.get(
 );
 
 router.get(
-  '/getNontification',
+  "/getNotification",
   authenticateMiddleware,
   checkSubscriptionMiddleware,
-  userBrowseController.getNontification
-)
+  userBrowseController.getNotification
+);
 
 router.get(
   '/getLike/:movieId',
