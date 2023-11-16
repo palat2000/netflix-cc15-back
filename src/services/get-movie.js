@@ -46,7 +46,11 @@ async function getMovie(profileId, isTVShow) {
       include: {
         video: {
           include: {
-            movie: true,
+            movie: {
+              include: {
+                likeMovie: true
+              }
+            }
           },
         },
       },

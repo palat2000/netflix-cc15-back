@@ -90,4 +90,13 @@ router.get(
   userBrowseController.getNontification
 )
 
+router.get(
+  '/getLike/:movieId',
+  authenticateMiddleware,
+  checkSubscriptionMiddleware,
+  authenticateProfileMiddleware,
+  userBrowseController.getLike
+)
+
+
 module.exports = router;

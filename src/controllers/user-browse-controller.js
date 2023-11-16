@@ -4,6 +4,7 @@ const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {
+    console.log('asasaas', req.userProfile.id)
     const isTVShow = req.query.isTVShow;
     let movies;
     if (req.userProfile.isKid) {
@@ -392,6 +393,24 @@ exports.editLike = async (req, res, next) => {
   }
 };
 
+exports.getLike = async (req, res, next) => {
+  try {
+    console.log("first")
+    console.log('qqqqqqq', req.userProfile.id)
+    const movieId = +req.params.movieId;
+    const likeHistory = await prisma.likeMovie.findFirst({
+      where: {
+        userProfileId: +req.userProfile.id,
+        movieId: movieId,
+      },
+    });
+    res.status(200).json({ likeHistory });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
 exports.startWatching = async (req, res, next) => {
   try {
     const { videoId } = req.params;
@@ -530,12 +549,15 @@ exports.getVideoById = async (req, res, next) => {
             userProfileId: +req.userProfile.id,
           },
         },
+        movie: true
       },
     });
+    console.log("🚀 ~ file: user-browse-controller.js:586 ~ exports.getVideoById= ~ videoData:", videoData)
 
     const otherVideoOfMovie = await prisma.video.findMany({
       where: {
-        AND: [{ movieId: +videoData.movieId }, { NOT: { id: +videoId } }],
+        // movieId: videoData.movieId
+        AND: [{ movieId: videoData.movieId }, { NOT: { id: +videoId } }],
       },
       include: {
         history: {
@@ -586,3 +608,5 @@ exports.getNontification = async (req, res, next) => {
     next(err);
   }
 };
+
+
