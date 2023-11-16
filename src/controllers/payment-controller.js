@@ -38,6 +38,14 @@ exports.subscription = async (req, res, next) => {
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
+    await stripe.paymentMethods.attach(subscription.default_payment_method, {
+      customer: subscription.customer,
+    });
+    await stripe.customers.update(subscription.customer, {
+      invoice_settings: {
+        default_payment_method: subscription.default_payment_method,
+      },
+    });
     const user = await prisma.user.update({
       data: {
         customerId: subscription.customer,
@@ -83,6 +91,7 @@ exports.cancelSubscription = async (req, res, next) => {
         isActive: false,
       },
     });
+    delete user.password;
     res.status(200).json({ user });
   } catch (err) {
     next(err);
@@ -102,6 +111,7 @@ exports.resumeSubscription = async (req, res, next) => {
         isActive: true,
       },
     });
+    delete user.password;
     res.status(200).json({ user });
   } catch (err) {
     next(err);
@@ -110,35 +120,23 @@ exports.resumeSubscription = async (req, res, next) => {
 
 exports.restartSubscription = async (req, res, next) => {
   try {
-    await stripe.subscriptions.update(req.user.subscriptionId, {
-      items: [{ id: req.user.subscriptionId }],
-      cancel_at: null,
+    const subscription = await stripe.subscriptions.create({
+      customer: req.user.customerId,
+      billing_cycle_anchor: new Date(req.user.expiredDate),
+      items: [{ price: req.body.priceId }],
     });
     const user = await prisma.user.update({
       data: {
         isActive: true,
+        subscriptionId: subscription.id,
+      },
+      where: {
+        id: req.user.id,
       },
     });
+    delete user.password;
     res.status(200).json({ user });
   } catch (err) {
     next(err);
   }
 };
-
-// exports.createPortalSession = async (req, res, next) => {
-//   // For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-//   // Typically this is stored alongside the authenticated user in your database.
-//   const { session_id } = req.body;
-//   const checkoutSession = await stripe.checkout.sessions.retrieve(session_id);
-
-//   // This is the url to which the customer will be redirected when they are done
-//   // managing their billing with the portal.
-//   const returnUrl = YOUR_DOMAIN;
-
-//   const portalSession = await stripe.billingPortal.sessions.create({
-//     customer: checkoutSession.customer,
-//     return_url: returnUrl,
-//   });
-
-//   res.redirect(303, portalSession.url);
-// };
