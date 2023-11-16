@@ -5,10 +5,6 @@ const createError = require("../utils/create-error");
 
 exports.payment = async (req, res, next) => {
   try {
-    // const prices = await stripe.prices.list({
-    //   lookup_keys: [req.body.lookup_key],
-    //   expand: ["data.product"],
-    // });
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: "auto",
       line_items: [
@@ -48,7 +44,7 @@ exports.subscription = async (req, res, next) => {
         subscriptionId: subscription.id,
         isActive: true,
         expiredDate: new Date(subscription.current_period_end * 1000),
-        activeAt: new DataTransfer(subscription.start_date * 1000),
+        activeAt: new Date(subscription.start_date * 1000),
       },
       where: {
         id: req.user.id,
@@ -78,18 +74,49 @@ exports.subscription = async (req, res, next) => {
 
 exports.cancelSubscription = async (req, res, next) => {
   try {
-    const findUser = await prisma.user.findUnique({
+    await stripe.subscriptions.cancel(req.user.subscriptionId);
+    const user = await prisma.user.update({
       where: {
         id: req.user.id,
       },
+      data: {
+        isActive: false,
+      },
     });
-    await stripe.subscriptions.cancel(findUser.subscriptionId);
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resumeSubscription = async (req, res, next) => {
+  try {
+    await stripe.subscriptions.resume(req.user.subscriptionId, {
+      billing_cycle_anchor: "now",
+    });
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        isActive: true,
+      },
+    });
+    res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.restartSubscription = async (req, res, next) => {
+  try {
+    await stripe.subscriptions.update(req.user.subscriptionId, {
+      items: [{ id: req.user.subscriptionId }],
+      cancel_at: null,
+    });
     const user = await prisma.user.update({
       data: {
-        subscriptionId: null,
-      },
-      where: {
-        id: findUser.id,
+        isActive: true,
       },
     });
     res.status(200).json({ user });
