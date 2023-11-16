@@ -28,6 +28,7 @@ exports.getMovie = async (req, res, next) => {
 
 exports.getMovieById = async (req, res, next) => {
   const movieId = +req.params.movieId;
+  console.log("req.userProfile.id", req.userProfile.id)
   try {
     const movie = await prisma.movie.findMany({
       where: {
@@ -50,7 +51,7 @@ exports.getMovieById = async (req, res, next) => {
             },
           },
         },
-        video: {},
+        video: true,
       },
     });
 
@@ -95,15 +96,40 @@ exports.getMovieById = async (req, res, next) => {
       if (el.myList.length === 0) el.myList = null;
       return el;
     });
-    console.log(
-      "🚀 ~ file: user-browse-controller.js:91 ~ exports.getMovieById= ~ moreLikeThisData:",
-      moreLikeThisData
-    );
 
-    res.status(200).json({
-      movie: { ...movie, likeHistory, inMyListHistory },
+    const recentWatchingHistory = await prisma.history.findMany({
+      where: {
+        userProfileId: req.userProfile.id
+      },
+      include: {
+        video: {
+          select: {
+            movieId: true,
+            videoEpisodeNo: true
+          }
+        }
+      },
+      orderBy: [
+        {
+          video: {
+            videoEpisodeNo: "desc"
+          },
+        },
+        { latestWatchingAt: "desc" }
+      ]
+    })
+
+    const historyWatchingEpisode = recentWatchingHistory.filter(el => el.video.movieId === movieId)
+
+    const firstEpisode = movie[0]?.video?.filter(el => el.videoEpisodeNo === 1)[0]
+    const recentWatchingEpisode = { videoId: historyWatchingEpisode[0]?.videoId || firstEpisode?.id }
+
+    const resData = {
+      movie: { ...movie, likeHistory, inMyListHistory, recentWatchingEpisode },
       moreLikeThisData,
-    });
+    }
+
+    res.status(200).json(resData);
   } catch (err) {
     next(err);
   }
