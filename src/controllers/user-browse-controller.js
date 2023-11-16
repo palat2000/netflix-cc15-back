@@ -583,10 +583,12 @@ exports.getVideoById = async (req, res, next) => {
         movie: true
       },
     });
+    console.log("🚀 ~ file: user-browse-controller.js:586 ~ exports.getVideoById= ~ videoData:", videoData)
 
     const otherVideoOfMovie = await prisma.video.findMany({
       where: {
-        AND: [{ movieId: +videoData.movieId }, { NOT: { id: +videoId } }],
+        // movieId: videoData.movieId
+        AND: [{ movieId: videoData.movieId }, { NOT: { id: +videoId } }],
       },
       include: {
         history: {
