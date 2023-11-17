@@ -10,6 +10,7 @@ const {
   registerSchema,
   loginSchema,
 } = require("../validators/admin-validator");
+const { findSourceMap } = require("module");
 
 exports.register = async (req, res, next) => {
   try {
@@ -276,23 +277,87 @@ exports.editMovieList = async (req, res, next) => {
 };
 exports.deleteMovieList = async (req, res, next) => {
   try {
-    const deleteMovieList = await prisma.movie.delete({
+
+    const deleteIdvideo = await prisma.video.findFirst({
+      where: { movieId: req.body.id }
+    })
+
+    const deleteIdactor = await prisma.actorMovie.findMany({
+      where: { movieId: req.body.id }
+    })
+
+    console.log(deleteIdactor)
+
+    const deleteIdlikemovie = await prisma.likeMovie.findFirst({
+      where: { movieId: req.body.id }
+    })
+
+    const deleteIdmylist = await prisma.myList.findFirst({
+      where: { movieId: req.body.id }
+    })
+
+    const deleteIdhistory = await prisma.history.findFirst({
+      where: { videoId: deleteIdvideo.id }
+
+    })
+    if (deleteIdhistory) {
+      deleteIdhistory.forEach(async (e) => {
+        await prisma.history.delete({
+          where: {
+            id: e.id,
+          }
+        })
+      }
+      )
+    }
+
+    if (deleteIdvideo) {
+      await prisma.video.delete({
+        where: {
+          id: deleteIdvideo.id,
+        },
+      })
+    }
+    if (deleteIdactor) {
+      deleteIdactor.forEach(async (e) => {
+        await prisma.actorMovie.delete({
+          where: {
+            id: e.id,
+          }
+        })
+      }
+      )
+    }
+
+    if (deleteIdlikemovie) {
+      await prisma.likeMovie.delete({
+        where: {
+          id: deleteIdlikemovie.id,
+        },
+      })
+    }
+    if (deleteIdmylist) {
+      await prisma.myList.delete({
+        where: {
+          id: deleteIdmylist.id,
+        },
+      })
+    }
+    if (deleteIdhistory) {
+      await prisma.history.delete({
+        where: {
+          id: deleteIdhistory.id,
+        }
+      })
+    }
+
+    const deletedMovies = await prisma.movie.delete({
       where: {
         id: req.body.id,
       },
-    });
-    const deleteVideo = await prisma.video.delete({
-      where: {
-        movieId: req.body.id,
-      },
-    });
-    const deleteActorMovie = await prisma.actorMovie.delete({
-      where: {
-        movieId: req.body.id,
-      },
-    });
+    })
 
-    res.status(200).json(deleteMovieList);
+    res.status(200).json(deletedMovies);
   } catch (error) {
     console.log(error);
   }
