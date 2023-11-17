@@ -36,6 +36,13 @@ async function getMovieByGenre(genre, profileId, isTVShow) {
         enumGenres: genre,
         isTVShow,
       },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
+      },
     });
     shuffleArray(genreMovie);
     genreMovie.forEach((movie) => {
@@ -199,12 +206,12 @@ async function getMovie(profileId, isTVShow) {
     data.continueWatching = continueWatching;
     data.top10 = top10;
     data.newReleases = newReleases;
-    data.action = await getMovieByGenre(ACTION, isTVShow);
-    data.sport = await getMovieByGenre(SPORTS, isTVShow);
-    data.comedy = await getMovieByGenre(COMEDIES, isTVShow);
-    data.horror = await getMovieByGenre(HORROR, isTVShow);
-    data.kids = await getMovieByGenre(KID, isTVShow);
-    data.romantic = await getMovieByGenre(ROMANCE, isTVShow);
+    data.action = await getMovieByGenre(ACTION, profileId, isTVShow);
+    data.sport = await getMovieByGenre(SPORTS, profileId, isTVShow);
+    data.comedy = await getMovieByGenre(COMEDIES, profileId, isTVShow);
+    data.horror = await getMovieByGenre(HORROR, profileId, isTVShow);
+    data.kids = await getMovieByGenre(KID, profileId, isTVShow);
+    data.romantic = await getMovieByGenre(ROMANCE, profileId, isTVShow);
   }
   return data;
 }
