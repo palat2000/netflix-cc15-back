@@ -4,7 +4,7 @@ const prisma = require("../models/prisma");
 
 exports.getMovie = async (req, res, next) => {
   try {
-    console.log('asasaas', req.userProfile.id)
+    console.log("asasaas", req.userProfile.id);
     const isTVShow = req.query.isTVShow;
     let movies;
     if (req.userProfile.isKid) {
@@ -395,8 +395,8 @@ exports.editLike = async (req, res, next) => {
 
 exports.getLike = async (req, res, next) => {
   try {
-    console.log("first")
-    console.log('qqqqqqq', req.userProfile.id)
+    console.log("first");
+    console.log("qqqqqqq", req.userProfile.id);
     const movieId = +req.params.movieId;
     const likeHistory = await prisma.likeMovie.findFirst({
       where: {
@@ -408,8 +408,7 @@ exports.getLike = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
-
+};
 
 exports.startWatching = async (req, res, next) => {
   try {
@@ -549,10 +548,13 @@ exports.getVideoById = async (req, res, next) => {
             userProfileId: +req.userProfile.id,
           },
         },
-        movie: true
+        movie: true,
       },
     });
-    console.log("🚀 ~ file: user-browse-controller.js:586 ~ exports.getVideoById= ~ videoData:", videoData)
+    console.log(
+      "🚀 ~ file: user-browse-controller.js:586 ~ exports.getVideoById= ~ videoData:",
+      videoData
+    );
 
     const otherVideoOfMovie = await prisma.video.findMany({
       where: {
@@ -591,7 +593,7 @@ exports.getNotification = async (req, res, next) => {
     const sevenDaysAgo = currentDatetime - 7 * 24 * 60 * 60 * 1000;
 
     let expireAlert = { subscriptExpireIn7Days: null };
-    if (daysDifference < 7) {
+    if (daysDifference < 30) {
       expireAlert.subscriptExpireIn7Days = expireDateTime.toLocaleString();
     }
 
@@ -609,5 +611,3 @@ exports.getNotification = async (req, res, next) => {
     next(err);
   }
 };
-
-
