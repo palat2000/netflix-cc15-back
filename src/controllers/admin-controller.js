@@ -357,7 +357,7 @@ exports.deleteMovieList = async (req, res, next) => {
       },
     })
 
-    res.status(200).json({ message: "Success" },deletedMovies);
+    res.status(200).json(deletedMovies);
   } catch (error) {
     console.log(error);
   }
