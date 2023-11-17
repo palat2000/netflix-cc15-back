@@ -9,18 +9,27 @@ const {
   ROMANCE,
 } = require("../config/constant");
 
-async function getMovieByGenre(genre, isTVShow) {
+async function getMovieByGenre(genre, profileId, isTVShow) {
   const genreArr = [];
   if (isTVShow === undefined) {
     const genreMovie = await prisma.movie.findMany({
       where: {
         enumGenres: genre,
       },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
+      },
     });
     shuffleArray(genreMovie);
-    for (let i = 0; i < 10; i++) {
-      genreArr.push(genreMovie.pop());
-    }
+    genreMovie.forEach((movie) => {
+      if (genreArr.length < 10) {
+        genreArr.push({ ...movie, likeMovie: movie.likeMovie[0] });
+      }
+    });
   } else {
     const genreMovie = await prisma.movie.findMany({
       where: {
@@ -29,9 +38,11 @@ async function getMovieByGenre(genre, isTVShow) {
       },
     });
     shuffleArray(genreMovie);
-    for (let i = 0; i < 10; i++) {
-      genreArr.push(genreMovie.pop());
-    }
+    genreMovie.forEach((movie) => {
+      if (genreArr.length < 10) {
+        genreArr.push({ ...movie, likeMovie: movie.likeMovie[0] });
+      }
+    });
   }
   return genreArr;
 }
@@ -73,30 +84,49 @@ async function getMovie(profileId, isTVShow) {
       }
       return acc;
     }, []);
-    console.log(JSON.stringify(continueWatching, null, 12));
-    const top10 = await prisma.movie.findMany({
+    const top10Movie = await prisma.movie.findMany({
       orderBy: {
         count_watching: "desc",
+      },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
       },
       take: 10,
       skip: 0,
     });
-    const newReleases = await prisma.movie.findMany({
+    const top10 = top10Movie.map((movie) => {
+      return { ...movie, likeMovie: movie.likeMovie[0] };
+    });
+    const newReleasesMovie = await prisma.movie.findMany({
       orderBy: {
         releaseDateForNetflix: "desc",
       },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
+      },
       take: 10,
       skip: 0,
+    });
+    const newReleases = newReleasesMovie.map((movie) => {
+      return { ...movie, likeMovie: movie.likeMovie[0] };
     });
     data.continueWatching = continueWatching;
     data.top10 = top10;
     data.newReleases = newReleases;
-    data.action = await getMovieByGenre(ACTION);
-    data.sport = await getMovieByGenre(SPORTS);
-    data.comedy = await getMovieByGenre(COMEDIES);
-    data.horror = await getMovieByGenre(HORROR);
-    data.kids = await getMovieByGenre(KID);
-    data.romantic = await getMovieByGenre(ROMANCE);
+    data.action = await getMovieByGenre(ACTION, profileId);
+    data.sport = await getMovieByGenre(SPORTS, profileId);
+    data.comedy = await getMovieByGenre(COMEDIES, profileId);
+    data.horror = await getMovieByGenre(HORROR, profileId);
+    data.kids = await getMovieByGenre(KID, profileId);
+    data.romantic = await getMovieByGenre(ROMANCE, profileId);
   } else {
     const continueWatchingMovie = await prisma.history.findMany({
       where: {
@@ -119,29 +149,52 @@ async function getMovie(profileId, isTVShow) {
     });
     const continueWatching = continueWatchingMovie.reduce((acc, movie) => {
       if (acc.length < 10 && movie.video.movie.isTVShow === isTVShow) {
-        acc.push({ ...movie.video.movie });
+        acc.push({
+          ...movie.video.movie,
+          likeMovie: movie.video.movie.likeMovie[0],
+        });
       }
       return acc;
     }, []);
-    const top10 = await prisma.movie.findMany({
+    const top10Movie = await prisma.movie.findMany({
       where: {
         isTVShow: isTVShow,
       },
       orderBy: {
         count_watching: "desc",
       },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
+      },
       take: 10,
       skip: 0,
     });
-    const newReleases = await prisma.movie.findMany({
+    const top10 = top10Movie.map((movie) => {
+      return { ...movie, likeMovie: movie.likeMovie[0] };
+    });
+    const newReleasesMovie = await prisma.movie.findMany({
       where: {
         isTVShow,
       },
       orderBy: {
         releaseDateForNetflix: "desc",
       },
+      include: {
+        likeMovie: {
+          where: {
+            userProfileId: profileId,
+          },
+        },
+      },
       take: 10,
       skip: 0,
+    });
+    const newReleases = newReleasesMovie.map((movie) => {
+      return { ...movie, likeMovie: movie.likeMovie[0] };
     });
     data.continueWatching = continueWatching;
     data.top10 = top10;
