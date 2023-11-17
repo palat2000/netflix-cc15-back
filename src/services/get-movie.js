@@ -39,7 +39,7 @@ async function getMovieByGenre(genre, isTVShow) {
 async function getMovie(profileId, isTVShow) {
   const data = {};
   if (isTVShow === undefined) {
-    const continueWatching = await prisma.history.findMany({
+    const continueWatchingMovie = await prisma.history.findMany({
       where: {
         userProfileId: profileId,
       },
@@ -48,9 +48,13 @@ async function getMovie(profileId, isTVShow) {
           include: {
             movie: {
               include: {
-                likeMovie: true
-              }
-            }
+                likeMovie: {
+                  where: {
+                    userProfileId: profileId,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -60,6 +64,16 @@ async function getMovie(profileId, isTVShow) {
       take: 10,
       skip: 0,
     });
+    const continueWatching = continueWatchingMovie.reduce((acc, movie) => {
+      if (acc.length < 10) {
+        acc.push({
+          ...movie.video.movie,
+          likeMovie: movie.video.movie.likeMovie[0],
+        });
+      }
+      return acc;
+    }, []);
+    console.log(JSON.stringify(continueWatching, null, 12));
     const top10 = await prisma.movie.findMany({
       orderBy: {
         count_watching: "desc",
@@ -91,7 +105,11 @@ async function getMovie(profileId, isTVShow) {
       include: {
         video: {
           include: {
-            movie: true,
+            movie: {
+              include: {
+                likeMovie: true,
+              },
+            },
           },
         },
       },
@@ -101,7 +119,7 @@ async function getMovie(profileId, isTVShow) {
     });
     const continueWatching = continueWatchingMovie.reduce((acc, movie) => {
       if (acc.length < 10 && movie.video.movie.isTVShow === isTVShow) {
-        acc.push(movie);
+        acc.push({ ...movie.video.movie });
       }
       return acc;
     }, []);
@@ -135,7 +153,6 @@ async function getMovie(profileId, isTVShow) {
     data.kids = await getMovieByGenre(KID, isTVShow);
     data.romantic = await getMovieByGenre(ROMANCE, isTVShow);
   }
-
   return data;
 }
 

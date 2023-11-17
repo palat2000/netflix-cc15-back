@@ -14,20 +14,30 @@ async function getMovieKids(profileId) {
     take: 10,
     skip: 0,
   });
-  const continueWatching = await prisma.history.findMany({
+  const continueWatchingMovie = await prisma.history.findMany({
     where: {
       userProfileId: profileId,
     },
     include: {
       video: {
         include: {
-          movie: true,
+          movie: {
+            include: {
+              likeMovie: true,
+            },
+          },
         },
       },
     },
     take: 10,
     skip: 0,
   });
+  const continueWatching = continueWatchingMovie.reduce((acc, movie) => {
+    if (acc.length < 10 && movie.video.movie.enumGenres === KID) {
+      acc.push({ ...movie.video.movie });
+    }
+    return acc;
+  }, []);
   const newReleases = await prisma.movie.findMany({
     where: {
       enumGenres: KID,
