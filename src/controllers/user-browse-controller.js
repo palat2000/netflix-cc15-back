@@ -7,8 +7,13 @@ exports.getMovie = async (req, res, next) => {
     console.log("asasaas", req.userProfile.id);
     const isTVShow = req.query.isTVShow;
     let movies;
-    if (req.userProfile.isKid) {
-      movies = await getMovieKids(req.userProfile.id);
+    if (req.userProfile.isKid || req.query.kid) {
+      if (isTVShow === undefined) {
+        movies = await getMovieKids(req.userProfile.id);
+      } else {
+        const isTVShowBoolean = Boolean(+isTVShow);
+        movies = await getMovieKids(req.userProfile.id, isTVShowBoolean);
+      }
     } else {
       if (isTVShow === undefined) {
         movies = await getMovie(req.userProfile.id);
