@@ -1,0 +1,87 @@
+### AUTH-ROUTE ###
+
+CHECK EMAIL
+GET /auth/checkemail
+BODY email
+RESPONSE
+201 { emailKey, message }
+404 { message: String , email not found}
+500 { message: String}
+
+
+REGISTER
+POST /auth/register
+BODY email, password
+RESPONSE
+201 { accessToken , user, kidProfile}
+400 { message: String, email is already used: true }
+500 { message: String }
+
+LOGIN
+POST /auth/login
+BODY email, password
+RESPONSE
+200 { accessToken , user, allUserProfile }
+400 { message: String, Sorry, we can't find an account with this email address. Please try again or create a new account. ,Incorrect password. Please try again. }
+500 { message: String }
+
+GET AUTHENTICATED USER
+GET /auth/me
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE
+200 { user }
+400 { message: String }
+500 { message: String }
+
+CHOOSE USER PROFILE
+GET /auth/profile
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { accessToken(of userProfileID), userProfile }
+400 { message: String }
+500 { message: String }
+
+### USER-ROUTE ###
+CREATE USER PROFILE
+POST /user/profile
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+201 { message: String, userProfile}
+400 { message: String, Already add this profile name }
+500 { message: String }
+
+DELETE USER PROFILE
+DELETE /user/profile
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { message: String, deleteUserProfile}
+400 { message: String }
+500 { message: String }
+
+EDIT USER PROFILE
+PATCH /user/profile
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { message: String, newUserProfileName}
+400 { message: String, userProfileName is required, This userProfileName is already use }
+500 { message: String }
+
+GET MOVIE BYId
+GET /user-browse/movie/:movieId
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE 
+200 { movie, moreLikeThis }
+400 { message: String }
+500 { message: String}
+
+
+### ADMIN-ROUTE ###
+
+CREATE MOVIE
+POST /admin/
+HEADER AUTHORIZATION Bearer ACCESS_TOKEN
+RESPONSE
+200 { }
+400 { message: String, Already add this movie name }
+500 { message: String}
+
